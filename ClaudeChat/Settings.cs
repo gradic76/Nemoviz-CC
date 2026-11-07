@@ -60,6 +60,8 @@ public sealed class Settings
 
     // --- Usage limit ---
     public bool ResumeAfterLimit { get; set; }
+    /// <summary>Look for a newer release at start (at most once a day).</summary>
+    public bool CheckUpdates { get; set; } = true;
     /// <summary>Null = the localized default prompt.</summary>
     public string? ResumePrompt { get; set; }
     public int LimitRetryMinutes { get; set; } = 15;
@@ -252,6 +254,9 @@ public sealed class Settings
 public sealed class AppState
 {
     public string? LastProject { get; set; }
+    public DateTime? LastUpdateCheck { get; set; }
+    /// <summary>A release the user said No to: not offered again at start (Help still offers it).</summary>
+    public string? SkippedVersion { get; set; }
     public Dictionary<string, string> Sessions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>Unsent text of the Message field per project, kept when the window closes.</summary>
     public Dictionary<string, string> Drafts { get; set; } = new(StringComparer.OrdinalIgnoreCase);

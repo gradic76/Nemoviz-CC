@@ -28,7 +28,7 @@ internal sealed partial class MainWindow
     private readonly List<IntPtr> _pageGeneral = new(), _pageSounds = new(), _pageClaude = new();
     private IntPtr _edPersonal, _edChat, _btnEditProject;
     private string? _diskPersonal, _diskChat; // the files as they were when the dialog opened; null = missing
-    private IntPtr _cbLang, _cbTheme, _cbFont, _chkSpeakSent, _chkSpeakReplies, _chkResume, _cbHandoff, _edRoot;
+    private IntPtr _cbLang, _cbTheme, _cbFont, _chkSpeakSent, _chkSpeakReplies, _chkResume, _chkUpdates, _cbHandoff, _edRoot;
     private IntPtr _chkSend, _chkBell, _chkTyping, _cbDevice, _chkKeepAwake, _cbVolSend, _cbVolBell, _cbVolTyping;
     private string? _dlgRoot;
     private List<string> _dlgDevices = new();
@@ -137,6 +137,7 @@ internal sealed partial class MainWindow
         DlgChild("STATIC", _loc["set.font"], label, 0, 0, g);
         _cbFont = DlgChild("COMBOBOX", "", combo, 0, 0, g);
         _chkResume = DlgChild("BUTTON", NoAmp(_loc["menu.session.resume"]), check, 0, 0, g);
+        _chkUpdates = DlgChild("BUTTON", _loc["set.updates"], check, 0, 0, g);
         DlgChild("STATIC", _loc["set.handoff"], label, 0, 0, g);
         _cbHandoff = DlgChild("COMBOBOX", "", combo, 0, 0, g);
         DlgChild("STATIC", _loc["set.projects"], label, 0, 0, g);
@@ -294,6 +295,7 @@ internal sealed partial class MainWindow
         Check(_chkSpeakSent, _settings.SpeakSent);
         Check(_chkSpeakReplies, _settings.SpeakReplies);
         Check(_chkResume, _settings.ResumeAfterLimit);
+        Check(_chkUpdates, _settings.CheckUpdates);
         Fill(_cbHandoff, HandoffChoices.Select(p => p == 0 ? _loc["set.handoff.off"] : $"{p} %"),
             Array.IndexOf(HandoffChoices, HandoffChoices.OrderBy(p => Math.Abs(p - _settings.ContextHandoffPercent)).First()));
         _dlgRoot = ProjectsRoot;
@@ -339,6 +341,7 @@ internal sealed partial class MainWindow
         _settings.SpeakSent = Checked(_chkSpeakSent); Save("speakSent", _settings.SpeakSent);
         _settings.SpeakReplies = Checked(_chkSpeakReplies); Save("speakReplies", _settings.SpeakReplies);
         _settings.ResumeAfterLimit = Checked(_chkResume); Save("resumeAfterLimit", _settings.ResumeAfterLimit);
+        _settings.CheckUpdates = Checked(_chkUpdates); Save("checkUpdates", _settings.CheckUpdates);
         _settings.ContextHandoffPercent = handoff; Save("contextHandoffPercent", handoff);
         if (_dlgRoot != null && !string.Equals(_dlgRoot, ProjectsRoot, StringComparison.OrdinalIgnoreCase))
         { _settings.ProjectsRoot = _dlgRoot; Save("projectsRoot", _dlgRoot); }

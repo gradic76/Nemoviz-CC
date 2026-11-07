@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<title>Nemoviz CC – upute</title>
+<style>
+body { font-family: Segoe UI, sans-serif; max-width: 48em; margin: 2em auto; padding: 0 1em; line-height: 1.5; }
+@media (prefers-color-scheme: dark) { body { background: #1e1e1e; color: #e8e8e8; } }
+</style>
+</head>
+<body>
+<h1>Nemoviz CC – upute</h1>
+<p>Nemoviz CC je prozor za razgovor s Claudeom, napravljen za čitače ekrana (JAWS i NVDA). Iza njega radi Claude Code, koji Claudeu omogućuje rad s datotekama i programima na računalu.</p>
+
+<h2>Prvo pokretanje</h2>
+<p>Program pita gdje će biti razgovori i projekti (zadano Dokumenti\Claude). Podmapa Chat je za obične razgovore, a svaka druga podmapa je jedan projekt.</p>
+<p>Ako Claude Code nije instaliran, program ponudi instalaciju. Ako nije prijavljen, odaberi Datoteka, Prijava u Claude; prijava ide u pregledniku.</p>
+<p>Za Claude Code treba pretplata na Claude (Pro ili Max).</p>
+
+<h2>Prozor</h2>
+<p>Odozgo prema dolje:</p>
+<ul>
+<li>Pokazatelji: Kontekst (koliko je razgovor pun), 5-satni i tjedni limit, te Model, Napor i Dopuštenja, koji se mogu mijenjati.</li>
+<li>Uživo: što Claude upravo radi. Govori samo dok je fokus u njemu. Uz njega je gumb Zaustavi.</li>
+<li>Povijest: cijeli razgovor. Svaka poruka počinje zaglavljem s imenom. Čita se strelicama.</li>
+<li>Unos: ovdje pišeš. Uz njega je gumb Pošalji.</li>
+</ul>
+<p>Kad Claude završi odgovor, odgovor se izgovori, osim ako si u polju Uživo, gdje si ga već čuo.</p>
+
+<h2>Tipke</h2>
+<ul>
+<li>Enter – pošalji. Shift+Enter – novi red.</li>
+<li>Alt+Enter – stavi u red čekanja; šalje se kad tekući odgovor završi.</li>
+<li>Alt+1 do Alt+0 – izgovori jednu od zadnjih deset poruka (Alt+1 je zadnja).</li>
+<li>U Povijesti: H – sljedeća poruka, Shift+H – prethodna.</li>
+<li>Alt+H – Povijest. Alt+E – Unos. Alt+L – Uživo.</li>
+<li>Tab i Shift+Tab – kroz sva polja i gumbe.</li>
+<li>Ctrl+U – priloži datoteke uz sljedeću poruku.</li>
+<li>Ctrl+V – lijepi tekst, a datoteke iz Explorera i sliku dodaje kao priloge.</li>
+<li>F1 – ove upute.</li>
+<li>Tipka Aplikacije ili Shift+F10: u Povijesti kopiraj poruku ili kod, spremi poruku, otvori datoteke i mape koje se u poruci spominju; u Unosu uređivanje i prilozi.</li>
+</ul>
+
+<h2>Izbornici</h2>
+<h3>Datoteka</h3>
+<ul>
+<li>Chat: Novi chat (naslov, upute za razgovor, model, prilozi, prva poruka) i dosadašnji razgovori, najnoviji gore.</li>
+<li>Code: Novi projekt (čarobnjak u dva koraka), Otvori postojeću mapu i projekti. U svakom projektu Novi razgovor i razgovori, od najstarijeg.</li>
+<li>Razgovori i projekti: otvori, preimenuj ili obriši razgovor, obriši projekt. Briše se uvijek u koš za smeće, uz pitanje.</li>
+<li>Otvori mapu u Exploreru, Postavke, Prijava u Claude, Izlaz.</li>
+</ul>
+<h3>Sesija</h3>
+<ul>
+<li>Novi razgovor i Odaberi mapu projekta.</li>
+<li>Nastavi nakon reseta limita: kad potrošiš limit, prozor sam nastavi kad se limit obnovi.</li>
+<li>Predaj i otvori novi razgovor: Claude zapiše dokle se stiglo, pa se otvara novi, prazan razgovor. To se događa i samo, kad se kontekst napuni (u Postavkama).</li>
+<li>Obriši ovaj razgovor.</li>
+</ul>
+<h3>Pomoć</h3>
+<ul>
+<li>Upute (F1), Prečaci, O programu.</li>
+</ul>
+
+<h2>Postavke</h2>
+<p>Datoteka, Postavke; Ctrl+Tab mijenja karticu.</p>
+<ul>
+<li>Općenito: jezik, tema, veličina slova, nastavak nakon limita, kad pokrenuti novu sesiju, mapa s projektima.</li>
+<li>Uređaji i zvukovi: tri zvuka (slanje, odgovor, rad), svaki s kvačicom, gumbom Poslušaj i glasnoćom; izgovor poslane poruke i odgovora; izlazni uređaj; Drži uređaj budnim (ako televizor ili HDMI odsijeca početak zvuka).</li>
+<li>Claude: osobne upute (vrijede u svim razgovorima i projektima) i upute za chatove. Ovdje Claudeu kažeš kako da ti se obraća i kakve odgovore želiš.</li>
+</ul>
+
+<h2>Gdje je što</h2>
+<ul>
+<li>Razgovori: mapa .claude\projects u tvojoj korisničkoj mapi, ista kao za Claude Code i Claudeovu desktop aplikaciju, pa se razgovori vide u oba.</li>
+<li>Postavke prozora: %APPDATA%\ClaudeChat (prijenosna inačica drži postavke uz program).</li>
+</ul>
+
+<p>Dizajn i projekt: Nemoguća vizija. Kodiranje: Claude (Anthropic). Licenca MIT.</p>
+</body>
+</html>

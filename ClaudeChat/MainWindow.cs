@@ -166,6 +166,7 @@ internal sealed partial class MainWindow
             AddEntry(_loc["role.system"], _loc.Format("history.error", "History context menu: SetWindowSubclass failed"));
         RestoreDraft();
         InitSounds();
+        AutoCheckForUpdates();
         try { File.Delete(RestartFlag); } catch { } // a request older than this window is stale
         Win32.SetTimer(_hwnd, (IntPtr)TimerRestart, 2000, IntPtr.Zero);
 
@@ -311,7 +312,9 @@ internal sealed partial class MainWindow
         // Settings → General, speech in Settings → Sounds and devices.
 
         IntPtr help = Win32.CreatePopupMenu();
+        Win32.AppendMenuW(help, Win32.MF_STRING, IdmHelp, _loc["menu.help.help"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmKeys, _loc["menu.help.keys"]);
+        Win32.AppendMenuW(help, Win32.MF_STRING, IdmCheckUpdates, _loc["menu.help.updates"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmAbout, _loc["menu.help.about"]);
         Win32.AppendMenuW(bar, Win32.MF_POPUP, help, _loc["menu.help"]);
 
@@ -802,6 +805,8 @@ internal sealed partial class MainWindow
             case IdmNewProject: NewProjectWizard(); break;
             case IdmOrganizer: ShowOrganizer(); break;
             case IdmLogin: StartLogin(); break;
+            case IdmHelp: ShowHelp(); break;
+            case IdmCheckUpdates: CheckForUpdates(manual: true); break;
             case IdmInstallClaude: OfferClaudeInstall(); break;
             case IdmOpenExisting: OpenProject(); break;
             case IdmDeleteCurrent: DeleteCurrentConversation(); break;
@@ -865,6 +870,9 @@ internal sealed partial class MainWindow
                 if (msg.hwnd == _btnSend) _sendAltClick = Win32.KeyDown(Win32.VK_MENU);
                 break;
 
+            case Win32.WM_KEYDOWN when vk == 0x70 /* F1 */:
+                ShowHelp();
+                return true;
             case Win32.WM_KEYDOWN:
                 bool ctrl = Win32.KeyDown(Win32.VK_CONTROL), shift = Win32.KeyDown(Win32.VK_SHIFT);
                 if (vk == Win32.VK_RETURN && focus == _input && !shift)

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nemoviz CC – help</title>
+<style>
+body { font-family: Segoe UI, sans-serif; max-width: 48em; margin: 2em auto; padding: 0 1em; line-height: 1.5; }
+@media (prefers-color-scheme: dark) { body { background: #1e1e1e; color: #e8e8e8; } }
+</style>
+</head>
+<body>
+<h1>Nemoviz CC – help</h1>
+<p>Nemoviz CC is a window for talking to Claude, built for screen readers (JAWS and NVDA). Behind it runs Claude Code, which lets Claude work with files and programs on your computer.</p>
+
+<h2>First start</h2>
+<p>The program asks where conversations and projects will live (Documents\Claude by default). The Chat subfolder is for plain conversations; every other subfolder is one project.</p>
+<p>If Claude Code is not installed, the program offers to install it. If it is not signed in, choose File, Sign in to Claude; signing in happens in the browser.</p>
+<p>Claude Code needs a Claude subscription (Pro or Max).</p>
+
+<h2>The window</h2>
+<p>From top to bottom:</p>
+<ul>
+<li>Indicators: Context (how full the conversation is), the 5-hour and weekly limits, and Model, Effort and Permissions, which can be changed.</li>
+<li>Live: what Claude is doing right now. It speaks only while it has the focus. Next to it is the Stop button.</li>
+<li>History: the whole conversation. Every message starts with a header with a name. It is read with the arrow keys.</li>
+<li>Message: where you write. Next to it is the Send button.</li>
+</ul>
+<p>When Claude finishes an answer, the answer is spoken, unless you are in the Live field, where you have already heard it.</p>
+
+<h2>Keys</h2>
+<ul>
+<li>Enter – send. Shift+Enter – new line.</li>
+<li>Alt+Enter – queue; it is sent when the current answer finishes.</li>
+<li>Alt+1 to Alt+0 – speak one of the last ten messages (Alt+1 is the latest).</li>
+<li>In History: H – next message, Shift+H – previous.</li>
+<li>Alt+H – History. Alt+E – Message. Alt+L – Live.</li>
+<li>Tab and Shift+Tab – through all fields and buttons.</li>
+<li>Ctrl+U – attach files to the next message.</li>
+<li>Ctrl+V – pastes text, and adds files from Explorer and an image as attachments.</li>
+<li>F1 – this help.</li>
+<li>Applications key or Shift+F10: in History, copy a message or code, save a message, open files and folders the message mentions; in Message, editing and attachments.</li>
+</ul>
+
+<h2>Menus</h2>
+<h3>File</h3>
+<ul>
+<li>Chat: New chat (title, instructions for the conversation, model, attachments, first message) and past conversations, newest first.</li>
+<li>Code: New project (a two-step wizard), Open an existing folder, and the projects. In each project, New conversation and the conversations, oldest first.</li>
+<li>Conversations and projects: open, rename or delete a conversation, delete a project. Deleting always goes to the Recycle Bin, after a question.</li>
+<li>Open folder in Explorer, Settings, Sign in to Claude, Exit.</li>
+</ul>
+<h3>Session</h3>
+<ul>
+<li>New conversation and Choose project folder.</li>
+<li>Resume after the usage limit resets: when you run out, the window carries on by itself once the limit is renewed.</li>
+<li>Hand over and open a new conversation: Claude writes down how far you got, then a new, empty conversation opens. This also happens by itself when the context fills up (in Settings).</li>
+<li>Delete this conversation.</li>
+</ul>
+<h3>Help</h3>
+<ul>
+<li>Help (F1), Keyboard shortcuts, About.</li>
+</ul>
+
+<h2>Settings</h2>
+<p>File, Settings; Ctrl+Tab changes the tab.</p>
+<ul>
+<li>General: language, theme, text size, resuming after the limit, when to start a new session, projects folder.</li>
+<li>Sounds and devices: three sounds (send, answer, working), each with a check box, a Listen button and its volume; speaking sent messages and answers; output device; Keep the device awake (if a TV or HDMI cuts off the start of a sound).</li>
+<li>Claude: personal instructions (for all conversations and projects) and instructions for chats. This is where you tell Claude how to address you and what answers you want.</li>
+</ul>
+
+<h2>Where things are</h2>
+<ul>
+<li>Conversations: the .claude\projects folder in your user folder, the same as for Claude Code and Claude's desktop app, so conversations show in both.</li>
+<li>Window settings: %APPDATA%\ClaudeChat (the portable build keeps its settings beside the program).</li>
+</ul>
+
+<p>Design and project: Nemoguća vizija. Coding: Claude (Anthropic). MIT license.</p>
+</body>
+</html>
