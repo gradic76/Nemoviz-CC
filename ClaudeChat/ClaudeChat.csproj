@@ -8,6 +8,7 @@
     <RootNamespace>ClaudeChat</RootNamespace>
     <AssemblyName>ClaudeChat</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>NemovizCC.ico</ApplicationIcon>
     <Version>0.1.0</Version>
     <Product>Nemoviz CC</Product>
     <Company>Nemoguća vizija</Company>

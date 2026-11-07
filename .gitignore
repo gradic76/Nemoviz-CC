@@ -9,3 +9,5 @@ CLAUDE.md
 .claude/
 .claude-chat.json
 prijava.cmd
+tools/ikona/*.exe
+tools/ikona/ladder.png

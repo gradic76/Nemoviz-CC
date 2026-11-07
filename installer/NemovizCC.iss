@@ -36,6 +36,7 @@ DefaultGroupName={#AppInstall}
 DisableProgramGroupPage=yes
 PrivilegesRequiredOverridesAllowed=dialog
 LicenseFile=..\LICENSE.txt
+SetupIconFile=..\ClaudeChat\NemovizCC.ico
 OutputDir=..\dist
 OutputBaseFilename=NemovizCC-Setup
 UninstallDisplayIcon={app}\{#AppExe}

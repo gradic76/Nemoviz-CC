@@ -1,0 +1,70 @@
+NEMOVIZ CC – UPUTE
+
+Nemoviz CC je prozor za razgovor s Claudeom, napravljen za čitače ekrana (JAWS i NVDA). Iza njega radi Claude Code, koji Claudeu omogućuje rad s datotekama i programima na računalu.
+
+
+PRVO POKRETANJE
+
+Program pita gdje će biti razgovori i projekti (zadano Dokumenti\Claude). Podmapa Chat je za obične razgovore, a svaka druga podmapa je jedan projekt.
+Ako Claude Code nije instaliran, program ponudi instalaciju. Ako nije prijavljen, odaberi Datoteka, Prijava u Claude; prijava ide u pregledniku.
+Za Claude Code treba pretplata na Claude (Pro ili Max).
+
+
+PROZOR
+
+Odozgo prema dolje:
+- Pokazatelji: Kontekst (koliko je razgovor pun), 5-satni i tjedni limit, te Model, Napor i Dopuštenja, koji se mogu mijenjati.
+- Uživo: što Claude upravo radi. Govori samo dok je fokus u njemu. Uz njega je gumb Zaustavi.
+- Povijest: cijeli razgovor. Svaka poruka počinje zaglavljem s imenom. Čita se strelicama.
+- Unos: ovdje pišeš. Uz njega je gumb Pošalji.
+
+Kad Claude završi odgovor, odgovor se izgovori, osim ako si u polju Uživo, gdje si ga već čuo.
+
+
+TIPKE
+
+Enter – pošalji. Shift+Enter – novi red.
+Alt+Enter – stavi u red čekanja; šalje se kad tekući odgovor završi.
+Alt+1 do Alt+0 – izgovori jednu od zadnjih deset poruka (Alt+1 je zadnja).
+U Povijesti: H – sljedeća poruka, Shift+H – prethodna.
+Alt+H – Povijest. Alt+E – Unos. Alt+L – Uživo.
+Tab i Shift+Tab – kroz sva polja i gumbe.
+Ctrl+U – priloži datoteke uz sljedeću poruku.
+Ctrl+V – lijepi tekst, a datoteke iz Explorera i sliku dodaje kao priloge.
+Tipka Aplikacije ili Shift+F10:
+- u Povijesti: kopiraj poruku ili kod, spremi poruku, otvori datoteke i mape koje se u poruci spominju;
+- u Unosu: uređivanje i prilozi.
+
+
+IZBORNICI
+
+Datoteka
+- Chat: Novi chat (naslov, upute za razgovor, model, prilozi, prva poruka) i dosadašnji razgovori, najnoviji gore.
+- Code: Novi projekt (čarobnjak u dva koraka), Otvori postojeću mapu i projekti. U svakom projektu Novi razgovor i razgovori, od najstarijeg.
+- Razgovori i projekti: otvori, preimenuj ili obriši razgovor, obriši projekt. Briše se uvijek u koš za smeće, uz pitanje.
+- Otvori mapu u Exploreru, Postavke, Prijava u Claude, Izlaz.
+
+Sesija
+- Novi razgovor i Odaberi mapu projekta.
+- Nastavi nakon reseta limita: kad potrošiš limit, prozor sam nastavi kad se limit obnovi.
+- Predaj i otvori novi razgovor: Claude zapiše dokle se stiglo, pa se otvara novi, prazan razgovor. To se događa i samo, kad se kontekst napuni (u Postavkama).
+- Obriši ovaj razgovor.
+
+Pomoć
+- Upute, Tipke, O programu.
+
+
+POSTAVKE (Datoteka, Postavke; Ctrl+Tab mijenja karticu)
+
+Općenito: jezik, tema, veličina slova, nastavak nakon limita, kad pokrenuti novu sesiju, mapa s projektima.
+Uređaji i zvukovi: tri zvuka (slanje, odgovor, rad), svaki s kvačicom, gumbom Poslušaj i glasnoćom; izgovor poslane poruke i odgovora; izlazni uređaj; Drži uređaj budnim (ako televizor ili HDMI odsijeca početak zvuka).
+Claude: osobne upute (vrijede u svim razgovorima i projektima) i upute za chatove. Ovdje Claudeu kažeš kako da ti se obraća i kakve odgovore želiš.
+
+
+GDJE JE ŠTO
+
+Razgovori: mapa .claude\projects u tvojoj korisničkoj mapi, ista kao za Claude Code i Claudeovu desktop aplikaciju, pa se razgovori vide u oba.
+Postavke prozora: %APPDATA%\ClaudeChat (prijenosna inačica drži postavke uz program).
+
+
+Dizajn i projekt: Nemoguća vizija. Kodiranje: Claude (Anthropic). Licenca MIT.

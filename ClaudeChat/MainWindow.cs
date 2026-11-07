@@ -189,7 +189,8 @@ internal sealed partial class MainWindow
             lpfnWndProc = Marshal.GetFunctionPointerForDelegate(proc),
             hInstance = _hInst,
             hCursor = Win32.LoadCursorW(IntPtr.Zero, (IntPtr)Win32.IDC_ARROW),
-            hIcon = Win32.LoadIconW(IntPtr.Zero, (IntPtr)Win32.IDI_APPLICATION),
+            // The exe's own icon (ApplicationIcon, resource 32512), else the system default.
+            hIcon = Win32.LoadIconW(_hInst, (IntPtr)32512) is { } own && own != IntPtr.Zero ? own : Win32.LoadIconW(IntPtr.Zero, (IntPtr)Win32.IDI_APPLICATION),
             lpszClassName = name,
         };
         Win32.RegisterClassExW(ref wc);
