@@ -1,0 +1,36 @@
+// Example settings for Claude Chat. Copy what you need to one of:
+//   settings.json next to ClaudeChat.exe          (portable: wins over %APPDATA%)
+//   %APPDATA%\ClaudeChat\settings.json            (per user)
+//   <project folder>\.claude-chat.json            (per project, overrides the user file)
+// Command line (--lang, --theme, --claude, --model, --project, --config, --new) overrides all.
+// Anything left out keeps its default. Comments and trailing commas are allowed.
+{
+  "appName": "Claude Chat",
+  "assistantName": "Claude",
+  "userName": null,                 // null = the localized "You"
+
+  "claudePath": null,               // null = find claude.exe automatically
+  "claudeArgs": [],                 // extra arguments for claude.exe
+  "claudeEnv": {},                  // extra environment variables for claude.exe
+  "model": null,
+  "permissionMode": null,           // null = Claude Code's own settings decide
+  "projectFolder": null,
+  "startMode": "continue",          // "continue" or "new"
+
+  "resumeAfterLimit": false,
+  "resumePrompt": null,             // null = the localized "Continue where you left off."
+  "limitRetryMinutes": 15,
+  "limitResumeDelaySeconds": 60,
+
+  "language": "auto",               // "auto" or a file name from lang\ ("hr", "en", ...)
+  "theme": "system",                // "system", "light", "dark"; high contrast always wins
+  "fontScale": 1.0,
+  "window": {
+    "widthRatio": 0.3333,           // share of the work area (screen minus taskbar)
+    "heightRatio": 1.0,
+    "bottomReserve": 10,            // device-independent pixels
+    "dock": "right"                 // "right", "left", "center"
+  },
+
+  "speech": "auto"                  // "auto" (JAWS, then NVDA), "jaws", "nvda", "none"
+}

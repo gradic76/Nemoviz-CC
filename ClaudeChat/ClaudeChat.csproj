@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>ClaudeChat</RootNamespace>
+    <AssemblyName>ClaudeChat</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>0.1.0</Version>
+    <Product>Nemoviz CC</Product>
+    <Company>Nemoguća vizija</Company>
+    <Authors>Nemoguća vizija; Claude (Anthropic)</Authors>
+    <Copyright>Nemoguća vizija, MIT licence</Copyright>
+    <AssemblyTitle>Nemoviz CC</AssemblyTitle>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Language files ship next to the exe so a translator can add one without rebuilding.
+         English is also embedded as the last-resort fallback. -->
+    <None Update="lang\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="lang\en.json" LogicalName="ClaudeChat.lang.en.json" />
+    <None Update="settings.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="sounds\*.wav" CopyToOutputDirectory="PreserveNewest" />
+    <!-- NVDA's controller client (x64, LGPL 2.1), the same copy Book Reader and The Bell ship:
+         without it nothing is spoken under NVDA. It must sit next to the exe. -->
+    <None Include="lib\nvdaControllerClient.dll" Link="nvdaControllerClient.dll" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="lib\nvdaControllerClient-license.txt" Link="nvdaControllerClient-license.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

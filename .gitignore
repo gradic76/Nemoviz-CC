@@ -1,0 +1,11 @@
+# Build output
+bin/
+obj/
+dist/
+app/
+
+# Private working notes and per-machine files (never published)
+CLAUDE.md
+.claude/
+.claude-chat.json
+prijava.cmd
