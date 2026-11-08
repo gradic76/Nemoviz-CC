@@ -54,6 +54,22 @@ internal sealed partial class MainWindow
     /// answer stay quiet otherwise (author, 2026-11-08); the Bell still rings, as the notice.</summary>
     private bool WindowActive => Win32.GetAncestor(Win32.GetForegroundWindow(), 3 /* GA_ROOTOWNER */) == _hwnd;
 
+    /// <summary>An answer finished while another program is in front: the taskbar button flashes
+    /// until the window comes forward (author, 2026-11-08), the standard Windows notice.</summary>
+    private void FlashTaskbar()
+    {
+        if (WindowActive) return;
+        var info = new Win32.FLASHWINFO
+        {
+            cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Win32.FLASHWINFO>(),
+            hwnd = _hwnd,
+            dwFlags = 0x2 | 0xC, // FLASHW_TRAY | FLASHW_TIMERNOFG: until it is the foreground window
+            uCount = 0,
+            dwTimeout = 0,
+        };
+        Win32.FlashWindowEx(ref info);
+    }
+
     /// <summary>Stop is only enabled while there is something to stop: an answer, a stop in
     /// progress, or a scheduled resume after the usage limit. Focus leaves it before it greys.</summary>
     private void UpdateStopButton()

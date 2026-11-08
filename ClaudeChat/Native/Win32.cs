@@ -419,6 +419,9 @@ internal static class Win32
     [DllImport("user32.dll")] public static extern IntPtr GetFocus();
     [DllImport("user32.dll")] public static extern IntPtr GetAncestor(IntPtr hWnd, int flags);
     [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr hWnd);
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FLASHWINFO { public uint cbSize; public IntPtr hwnd; public uint dwFlags; public uint uCount; public uint dwTimeout; }
+    [DllImport("user32.dll")] public static extern bool FlashWindowEx(ref FLASHWINFO info);
     [DllImport("user32.dll")] public static extern IntPtr GetNextDlgTabItem(IntPtr hDlg, IntPtr hCtl, bool previous);
     public const uint WM_CHANGEUISTATE = 0x0127;
     [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();

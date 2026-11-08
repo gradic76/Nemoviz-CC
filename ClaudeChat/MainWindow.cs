@@ -1436,7 +1436,7 @@ internal sealed partial class MainWindow
         string text = _turnText.ToString();
         AddEntry(_settings.AssistantName, text);
         _turnText.Clear();
-        if (speak) PlayBell();
+        if (speak) { PlayBell(); FlashTaskbar(); }
         if (speak && _settings.SpeakReplies && Win32.GetFocus() != _live && WindowActive) _speech.Speak(text, false);
     }
 
