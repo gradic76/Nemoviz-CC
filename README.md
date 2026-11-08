@@ -38,8 +38,8 @@ Odozgo: pokazatelji (kontekst, 5-satni i tjedni limit, model, napor, dopuštenja
 ### Izbornici
 
 - Datoteka, Chat: Novi chat (naslov, upute, model, prilozi) i dosadašnji razgovori.
-- Datoteka, Code: Novi projekt (čarobnjak), Otvori postojeću mapu i projekti s razgovorima.
-- Datoteka, Razgovori i projekti: otvori, preimenuj i obriši (uvijek u koš za smeće).
+- Datoteka, Code: Novi projekt (čarobnjak), Otvori postojeći projekt/chat i projekti s razgovorima.
+- Datoteka, Upravljanje projektima i razgovorima: preimenuj, sakrij ili obriši s diska (u koš za smeće), prikaži memoriju, otvori razgovor (Enter).
 - Datoteka, Postavke: jezik, tema, veličina slova, zvukovi, izgovor, upute za Claudea.
 - Sesija: novi razgovor, nastavak nakon limita, predaja prije punjenja konteksta, brisanje tekućeg razgovora.
 
@@ -90,8 +90,8 @@ From the top: indicators (context, 5-hour and weekly limits, model, effort, perm
 ### Menus
 
 - File, Chat: New chat (title, instructions, model, attachments) and past conversations.
-- File, Code: New project (wizard), Open an existing folder, and projects with their conversations.
-- File, Conversations and projects: open, rename and delete (always to the Recycle Bin).
+- File, Code: New project (wizard), Open an existing project/chat, and projects with their conversations.
+- File, Manage projects and conversations: rename, hide or delete from disk (to the Recycle Bin), show memory, open a conversation (Enter).
 - File, Settings: language, theme, text size, sounds, speech, instructions for Claude.
 - Session: new conversation, resume after the usage limit, hand over before the context fills, delete the current conversation.
 

@@ -35,17 +35,25 @@ internal sealed partial class MainWindow
         public Func<int, int, bool>? OnCommand;
         /// <summary>Called with the result while the controls still exist: read the values here.</summary>
         public Action<int>? BeforeClose;
+        /// <summary>Controls placed by CustomLayout rather than in rows (themed all the same).</summary>
+        public readonly List<IntPtr> Extra = new();
+        public Action? CustomLayout;
+        /// <summary>WM_CONTEXTMENU: the control and the raw lParam (-1 = from the keyboard).</summary>
+        public Action<IntPtr, IntPtr>? OnContextMenu;
+        /// <summary>WM_NOTIFY: the control and the notification code.</summary>
+        public Action<IntPtr, int>? OnNotify;
         public int NextId = 3000;
     }
 
     private Form? _form;
+    private static readonly Dictionary<IntPtr, Form> s_forms = new();
 
     private Form BeginForm(string title)
     {
         if (!s_formClassRegistered) { RegisterClass(FormClass, s_formProc); s_formClassRegistered = true; }
         var f = new Form();
         f.Hwnd = Win32.CreateWindowExW(Win32.WS_EX_DLGMODALFRAME | Win32.WS_EX_CONTROLPARENT, FormClass, title,
-            Win32.WS_POPUP | Win32.WS_CAPTION | Win32.WS_SYSMENU | Win32.WS_CLIPCHILDREN, 0, 0, S(800), S(600), _hwnd, IntPtr.Zero, _hInst, IntPtr.Zero);
+            Win32.WS_POPUP | Win32.WS_CAPTION | Win32.WS_SYSMENU | Win32.WS_CLIPCHILDREN, 0, 0, S(800), S(600), _form?.Hwnd ?? _hwnd, IntPtr.Zero, _hInst, IntPtr.Zero);
         return f;
     }
 
@@ -149,8 +157,21 @@ internal sealed partial class MainWindow
         if (n > 0) Win32.SendMessageW(list, 0x0186 /* LB_SETCURSEL */, (IntPtr)Math.Min(i, n - 1), IntPtr.Zero);
     }
 
+    /// <summary>Gives the form this client size, beside the main window's right edge, no taller than it.</summary>
+    private int SizeForm(Form f, int clientW, int clientH)
+    {
+        Win32.GetWindowRect(_hwnd, out RECT owner);
+        Win32.GetWindowRect(f.Hwnd, out RECT wr);
+        Win32.GetClientRect(f.Hwnd, out RECT cr);
+        int frameW = wr.Width - cr.Width, frameH = wr.Height - cr.Height;
+        clientH = Math.Min(clientH, owner.Height - frameH);
+        Win32.SetWindowPos(f.Hwnd, IntPtr.Zero, Math.Max(0, owner.Right - clientW - frameW), owner.Top + S(30), clientW + frameW, clientH + frameH, 0x0004 | 0x0010);
+        return clientH;
+    }
+
     private void LayoutForm(Form f)
     {
+        if (f.CustomLayout != null) { f.CustomLayout(); return; }
         int pad = S(10), gap = S(6), lineH = Measure("Ag").cy, rowH = lineH + S(12);
         // The left column: labels as wide as the widest one, fields after them.
         int labelW = 0;
@@ -193,21 +214,12 @@ internal sealed partial class MainWindow
         }
         int leftBottom = y;
 
-        int bigX = pad + leftW + pad * 2, bigW = S(380);
+        bool big = f.Big != IntPtr.Zero;
+        int bigX = big ? pad + leftW + pad * 2 : pad, bigW = big ? S(380) : leftW;
         int btnW = f.Buttons.Count == 0 ? 0 : f.Buttons.Max(b => Math.Max(S(90), Measure(Win32.GetText(b)).cx + S(24)));
         bigW = Math.Max(bigW, f.Buttons.Count * (btnW + gap) - gap);
         int clientW = bigX + bigW + pad;
-        int clientH = Math.Max(leftBottom, S(330)) + pad;
-
-        // Fit the owner window's height (the main window is as tall as the work area).
-        Win32.GetWindowRect(_hwnd, out RECT owner);
-        Win32.GetWindowRect(f.Hwnd, out RECT wr);
-        Win32.GetClientRect(f.Hwnd, out RECT cr);
-        int frameW = wr.Width - cr.Width, frameH = wr.Height - cr.Height;
-        clientH = Math.Min(clientH, owner.Height - frameH);
-        int winW = clientW + frameW, winH = clientH + frameH;
-        int left = owner.Right - winW; // beside the right edge, where the main window is
-        Win32.SetWindowPos(f.Hwnd, IntPtr.Zero, Math.Max(0, left), owner.Top + S(30), winW, winH, 0x0004 | 0x0010 /* NOZORDER|NOACTIVATE */);
+        int clientH = SizeForm(f, clientW, big ? Math.Max(leftBottom, S(330)) + pad : leftBottom + rowH + pad);
 
         int by = clientH - pad - rowH;
         if (f.Big != IntPtr.Zero)
@@ -230,9 +242,12 @@ internal sealed partial class MainWindow
         LayoutForm(f);
         foreach (var c in AllChildren(f)) ThemeDialogControl(c);
         _theme.ApplyToTopLevel(f.Hwnd);
+        Form? outer = _form;
+        IntPtr ownerWindow = outer?.Hwnd ?? _hwnd;
         _form = f;
+        s_forms[f.Hwnd] = f;
         IntPtr focusBefore = Win32.GetFocus();
-        Win32.EnableWindow(_hwnd, false);
+        Win32.EnableWindow(ownerWindow, false);
         Win32.ShowWindow(f.Hwnd, Win32.SW_SHOWNORMAL);
         Win32.SetFocus(focus != IntPtr.Zero ? focus : f.Rows.Count > 0 ? f.Rows[0].Control : f.Big);
 
@@ -252,10 +267,11 @@ internal sealed partial class MainWindow
         }
 
         f.BeforeClose?.Invoke(f.Result);
-        Win32.EnableWindow(_hwnd, true);
+        Win32.EnableWindow(ownerWindow, true);
+        s_forms.Remove(f.Hwnd);
         Win32.DestroyWindow(f.Hwnd);
-        _form = null;
-        Win32.SetForegroundWindow(_hwnd);
+        _form = outer;
+        Win32.SetForegroundWindow(ownerWindow);
         Win32.SetFocus(focusBefore != IntPtr.Zero && Win32.IsWindow(focusBefore) ? focusBefore : _input);
         return f.Result;
     }
@@ -264,14 +280,14 @@ internal sealed partial class MainWindow
     {
         foreach (var r in f.Rows) { if (r.Label != IntPtr.Zero) yield return r.Label; yield return r.Control; }
         if (f.Big != IntPtr.Zero) { yield return f.BigLabel; yield return f.Big; }
+        foreach (var e in f.Extra) yield return e;
         foreach (var b in f.Buttons) yield return b;
     }
 
     private static IntPtr FormProcStatic(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam)
     {
         var self = s_instance;
-        var f = self?._form;
-        if (self != null && f != null && hwnd == f.Hwnd)
+        if (self != null && s_forms.TryGetValue(hwnd, out var f))
         {
             switch (msg)
             {
@@ -286,6 +302,13 @@ internal sealed partial class MainWindow
                 case Win32.WM_CLOSE:
                     f.Result = FormCancel; f.Done = true;
                     return IntPtr.Zero;
+                case Win32.WM_CONTEXTMENU when f.OnContextMenu != null:
+                    f.OnContextMenu(wParam, lParam);
+                    return IntPtr.Zero;
+                case Win32.WM_NOTIFY when f.OnNotify != null:
+                    var nm = Marshal.PtrToStructure<Win32.NMHDR>(lParam);
+                    f.OnNotify(nm.hwndFrom, nm.code);
+                    break;
                 case 0x0006: // WM_ACTIVATE: back to the last control after Alt+Tab
                     if (Win32.LoWord(wParam) == 0)
                     {

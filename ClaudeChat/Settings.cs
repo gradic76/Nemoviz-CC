@@ -269,6 +269,10 @@ public sealed class AppState
     public Dictionary<string, ConversationMeta> Conversations { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>Project folders taken out of the Code list without deleting their files.</summary>
     public List<string> HiddenProjects { get; set; } = new();
+    /// <summary>Conversations (session ids) hidden in the application; opening their folder brings them back.</summary>
+    public List<string> HiddenConversations { get; set; } = new();
+    /// <summary>Names shown for projects instead of the folder name (the folder itself is not renamed).</summary>
+    public Dictionary<string, string> ProjectTitles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>Project folders outside the projects folder, opened by hand (Code list).</summary>
     public List<string> ExtraProjects { get; set; } = new();
 

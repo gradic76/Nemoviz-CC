@@ -59,13 +59,20 @@ internal sealed partial class MainWindow
     }
 
     /// <summary>Opens the current project's CLAUDE.md in Notepad (created with a heading if missing).</summary>
-    private void EditProjectInstructions()
+    private void EditProjectInstructions() => OpenInstructions(_project);
+
+    /// <summary>A folder's CLAUDE.md in Notepad; made if missing (Chat from its template).</summary>
+    private void OpenInstructions(string folder)
     {
         try
         {
-            string path = ProjectInstructionsPath;
+            string path = Path.Combine(folder, "CLAUDE.md");
             if (!File.Exists(path))
-                File.WriteAllText(path, "# " + Path.GetFileName(_project.TrimEnd('\\', '/')) + "\n\n", new UTF8Encoding(false));
+            {
+                string first = SameFolder(folder, ChatFolderPath) ? _loc["tpl.chat"]
+                    : "# " + Path.GetFileName(folder.TrimEnd('\\', '/')) + "\n\n";
+                File.WriteAllText(path, first, new UTF8Encoding(false));
+            }
             Process.Start(new ProcessStartInfo("notepad.exe") { ArgumentList = { path }, UseShellExecute = false });
         }
         catch (Exception e) { AddEntry(_loc["role.system"], e.Message); }

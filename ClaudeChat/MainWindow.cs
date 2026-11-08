@@ -1623,6 +1623,8 @@ internal sealed partial class MainWindow
     {
         string? folder = Program.PickFolder(_hwnd, _loc["dialog.pickFolder"], _project);
         if (folder == null || !Directory.Exists(folder)) return;
+        // Opening a folder brings back what was hidden in it (Manage projects and conversations).
+        foreach (var s in SessionCatalog.For(folder, 100000)) _state.HiddenConversations.Remove(s.Id);
         SwitchTo(folder, null, newConversation: false, null);
     }
 
@@ -1654,7 +1656,7 @@ internal sealed partial class MainWindow
     {
         IntPtr popup = Win32.CreatePopupMenu();
         // In Chat the wizard is the only way in (author, 2026-11-07): confirmed empty, it is a plain new chat.
-        if (SameFolder(folder, ChatFolderPath)) Win32.AppendMenuW(popup, Win32.MF_STRING, IdmNewChat, _loc["menu.file.newChat"]);
+        if (SameFolder(folder, ChatFolderPath)) { Win32.AppendMenuW(popup, Win32.MF_STRING, IdmNewChat, _loc["menu.file.newChat"]); Win32.AppendMenuW(popup, Win32.MF_STRING, IdmOpenExisting, _loc["menu.file.openExisting"]); }
         else Win32.AppendMenuW(popup, Win32.MF_STRING, (IntPtr)Target(folder, null, true, _loc["conv.new"]), _loc["menu.conv.new"]);
         Win32.AppendMenuW(popup, Win32.MF_SEPARATOR, IntPtr.Zero, null);
 

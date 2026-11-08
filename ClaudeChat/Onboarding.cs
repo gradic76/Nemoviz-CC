@@ -82,8 +82,11 @@ internal sealed partial class MainWindow
     }
 
     /// <summary>A project's name in the lists; outside the projects folder with where it is.</summary>
-    private string ProjectLabel(string folder) =>
-        UnderRoot(folder) ? Path.GetFileName(folder) : $"{Path.GetFileName(folder)} ({Path.GetDirectoryName(folder)})";
+    private string ProjectLabel(string folder)
+    {
+        string name = _state.ProjectTitles.TryGetValue(Path.GetFullPath(folder).TrimEnd('\\'), out var t) ? t : Path.GetFileName(folder);
+        return UnderRoot(folder) ? name : $"{name} ({Path.GetDirectoryName(folder)})";
+    }
 
     // ------------------------------------------------------------------ sign in / install
 

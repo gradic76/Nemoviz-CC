@@ -192,6 +192,11 @@ internal sealed partial class MainWindow
             case "ComboBox": _theme.ApplyToControl(c, Theme.ControlRole.Combo); break;
             case "Edit": _theme.ApplyToControl(c, Theme.ControlRole.Field); break;
             case "ListBox": _theme.ApplyToControl(c, Theme.ControlRole.Field); break;
+            case "SysTreeView32":
+                _theme.ApplyToControl(c, Theme.ControlRole.Field);
+                Win32.SendMessageW(c, 0x111D /* TVM_SETBKCOLOR */, IntPtr.Zero, (IntPtr)_theme.FieldBack);
+                Win32.SendMessageW(c, 0x111E /* TVM_SETTEXTCOLOR */, IntPtr.Zero, (IntPtr)_theme.FieldText);
+                break;
             case "Button":
                 long style = (long)GetWindowLongPtrW(c, -16);
                 _theme.ApplyToControl(c, (style & 0xF) == Win32.BS_AUTOCHECKBOX ? Theme.ControlRole.CheckBox : Theme.ControlRole.PushButton);
