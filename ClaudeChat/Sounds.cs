@@ -63,10 +63,22 @@ internal sealed partial class MainWindow
         {
             cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Win32.FLASHWINFO>(),
             hwnd = _hwnd,
-            dwFlags = 0x2 | 0xC, // FLASHW_TRAY | FLASHW_TIMERNOFG: until it is the foreground window
-            uCount = 0,
+            dwFlags = 0x3, // FLASHW_ALL with a count, as Electron's flashFrame does (Claude Desktop uses that)
+            uCount = 4,
             dwTimeout = 0,
         };
+        Win32.FlashWindowEx(ref info);
+        _flashing = true;
+    }
+
+    private bool _flashing;
+
+    /// <summary>Back in the window: the taskbar button stops asking for attention.</summary>
+    private void StopFlashWhenActive()
+    {
+        if (!_flashing || !WindowActive) return;
+        _flashing = false;
+        var info = new Win32.FLASHWINFO { cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Win32.FLASHWINFO>(), hwnd = _hwnd, dwFlags = 0 /* FLASHW_STOP */ };
         Win32.FlashWindowEx(ref info);
     }
 

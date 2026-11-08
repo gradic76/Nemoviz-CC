@@ -1605,7 +1605,7 @@ internal sealed partial class MainWindow
     {
         if (id == TimerStop) { ForceStop(); return; }
         if (id == TimerRestart) { CheckRestartRequest(); return; }
-        if (id == TimerSound) { UpdateTypingSound(); UpdateStopButton(); return; }
+        if (id == TimerSound) { UpdateTypingSound(); UpdateStopButton(); StopFlashWhenActive(); return; }
         if (id != TimerLimit) return;
         if (!ResumeChecked || _resumeAt == null) { CancelResumeTimer(); return; }
         if (DateTimeOffset.Now < _resumeAt.Value || _busy) return;
