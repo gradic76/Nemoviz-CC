@@ -70,7 +70,7 @@
   "menu.file.login": "Sign &in to Claude…",
   "menu.file.openExisting": "&Open an existing project/chat…",
   "login.info": "A console window with Claude Code will open.\n\nIf it asks you to sign in, follow it: signing in happens in the browser. If it does not ask, type /login and press Enter.\n\nWhen you are done, type /exit and press Enter. The next message in this window already uses the new sign-in.",
-  "login.hint": "Claude Code seems not to be signed in, or the sign-in has expired. Sign in with File, Sign in to Claude, then send the message again.",
+  "login.hint": "Claude Code seems not to be signed in, or the sign-in has expired. Sign in with Help, Sign in to Claude, then send the message again.",
   "install.ask": "Claude Code is not installed (or cannot be found). Without it this window cannot talk to Claude. Claude Code also needs a Claude subscription (Pro or Max).\n\nInstall it now? A PowerShell window with the official installer will open; when it finishes, close it and send a message.",
   "first.intro": "Welcome to {0}.\n\nConversations and projects will be kept in:\n{1}\n\nIts Chat subfolder is for plain conversations, and every other subfolder is one project. Projects elsewhere show up too, once you have worked in them.\n\nYes: use this folder.\nNo: choose another folder.\nCancel: close the program.",
   "first.pickRoot": "Choose a folder for conversations and projects",

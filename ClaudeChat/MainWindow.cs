@@ -292,7 +292,6 @@ internal sealed partial class MainWindow
         Win32.AppendMenuW(file, Win32.MF_SEPARATOR, IntPtr.Zero, null);
         Win32.AppendMenuW(file, Win32.MF_STRING, IdmExplore, _loc["menu.file.explore"]);
         Win32.AppendMenuW(file, Win32.MF_STRING, IdmSettings, _loc["menu.file.settings"]);
-        Win32.AppendMenuW(file, Win32.MF_STRING, IdmLogin, _loc["menu.file.login"]);
         Win32.AppendMenuW(file, Win32.MF_SEPARATOR, IntPtr.Zero, null);
         Win32.AppendMenuW(file, Win32.MF_STRING, IdmExit, _loc["menu.file.exit"]);
         Win32.AppendMenuW(bar, Win32.MF_POPUP, file, _loc["menu.file"]);
@@ -315,6 +314,7 @@ internal sealed partial class MainWindow
         IntPtr help = Win32.CreatePopupMenu();
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmHelp, _loc["menu.help.help"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmKeys, _loc["menu.help.keys"]);
+        Win32.AppendMenuW(help, Win32.MF_STRING, IdmLogin, _loc["menu.file.login"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmCheckUpdates, _loc["menu.help.updates"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmAbout, _loc["menu.help.about"]);
         Win32.AppendMenuW(bar, Win32.MF_POPUP, help, _loc["menu.help"]);

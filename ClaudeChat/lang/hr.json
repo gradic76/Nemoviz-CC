@@ -70,7 +70,7 @@
   "menu.file.login": "Pri&java u Claude…",
   "menu.file.openExisting": "&Otvori postojeći projekt/chat…",
   "login.info": "Otvorit će se prozor konzole s Claude Codeom.\n\nAko traži prijavu, slijedi upute: prijava ide u pregledniku. Ako ne traži, upiši /login i pritisni Enter.\n\nKad završiš, upiši /exit i pritisni Enter. Sljedeća poruka u ovom prozoru već ide s novom prijavom.",
-  "login.hint": "Izgleda da Claude Code nije prijavljen ili je prijava istekla. Prijavi se preko Datoteka, Prijava u Claude, pa pošalji poruku ponovo.",
+  "login.hint": "Izgleda da Claude Code nije prijavljen ili je prijava istekla. Prijavi se preko Pomoć, Prijava u Claude, pa pošalji poruku ponovo.",
   "install.ask": "Claude Code nije instaliran (ili ga ne nalazim). Bez njega ovaj prozor ne može razgovarati s Claudeom. Za Claude Code treba i pretplata na Claude (Pro ili Max).\n\nDa ga instaliram sada? Otvorit će se prozor PowerShella sa službenom instalacijom; kad završi, zatvori ga i pošalji poruku.",
   "first.intro": "Dobro došao u {0}.\n\nRazgovori i projekti bit će u mapi:\n{1}\n\nU njoj je podmapa Chat za obične razgovore, a svaka druga podmapa je jedan projekt. Projekti s drugih mjesta također se vide, čim u njima jednom radiš.\n\nDa: koristi tu mapu.\nNe: izaberi drugu mapu.\nOdustani: zatvori program.",
   "first.pickRoot": "Izaberi mapu za razgovore i projekte",

@@ -22,7 +22,7 @@ Program nije digitalno potpisan, pa Windows pri prvom pokretanju može pokazati 
 ### Prvo pokretanje
 
 1. Program pita gdje će biti razgovori i projekti (zadano Dokumenti\Claude). U toj mapi podmapa Chat služi za obične razgovore, a svaka druga podmapa je jedan projekt.
-2. Ako Claude Code nije prijavljen, odaberi Datoteka, Prijava u Claude. Otvorit će se konzola; prijava ide u pregledniku.
+2. Ako Claude Code nije prijavljen, odaberi Pomoć, Prijava u Claude. Otvorit će se konzola; prijava ide u pregledniku.
 
 ### Prozor
 
@@ -74,7 +74,7 @@ The program is not digitally signed, so Windows SmartScreen may warn on first st
 ### First start
 
 1. The program asks where conversations and projects live (Documents\Claude by default). Its Chat subfolder is for plain conversations; every other subfolder is one project.
-2. If Claude Code is not signed in, choose File, Sign in to Claude. A console opens; signing in happens in the browser.
+2. If Claude Code is not signed in, choose Help, Sign in to Claude. A console opens; signing in happens in the browser.
 
 ### The window
 
