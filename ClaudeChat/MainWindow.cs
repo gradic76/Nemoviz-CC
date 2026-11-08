@@ -153,6 +153,7 @@ internal sealed partial class MainWindow
         _state.HiddenProjects.RemoveAll(h => SameFolder(h, _project)); // opened again: back in the list
         _state.LastProject = _project;
         _state.Save();
+        RestoreLimits();
         // History first: loading it clears the field, so start-up notes come after it.
         LoadHistory();
         if (_settings.Problems.Count > 0)
@@ -558,6 +559,25 @@ internal sealed partial class MainWindow
     }
 
     private void OnLimits(double? five, DateTimeOffset? fiveAt, double? week, DateTimeOffset? weekAt)
+    {
+        if (five != null) { _state.LimitFive = five; _state.LimitFiveAt = fiveAt; }
+        if (week != null) { _state.LimitWeek = week; _state.LimitWeekAt = weekAt; }
+        if (five != null || week != null) _state.Save();
+        ShowLimits(five, fiveAt, week, weekAt);
+    }
+
+    /// <summary>At start: the last known limits, so the indicators are not empty until the first
+    /// answer (author, 2026-11-08). A window that has renewed since then counts as 0 %.</summary>
+    private void RestoreLimits()
+    {
+        var now = DateTimeOffset.Now;
+        double? Value(double? u, DateTimeOffset? at) => u == null ? null : at is { } a && a <= now ? 0 : u;
+        DateTimeOffset? When(DateTimeOffset? at) => at is { } a && a > now ? a : null;
+        ShowLimits(Value(_state.LimitFive, _state.LimitFiveAt), When(_state.LimitFiveAt),
+                   Value(_state.LimitWeek, _state.LimitWeekAt), When(_state.LimitWeekAt));
+    }
+
+    private void ShowLimits(double? five, DateTimeOffset? fiveAt, double? week, DateTimeOffset? weekAt)
     {
         // "t" alone is the short-time pattern; inside a custom pattern it would be the AM/PM letter
         // (that is how "čet p" came out), so the weekday and the time are formatted separately.

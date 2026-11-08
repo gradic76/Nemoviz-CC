@@ -255,6 +255,11 @@ public sealed class AppState
 {
     public string? LastProject { get; set; }
     public DateTime? LastUpdateCheck { get; set; }
+    /// <summary>The last known usage limits (0..1 and when they renew), shown at the next start.</summary>
+    public double? LimitFive { get; set; }
+    public DateTimeOffset? LimitFiveAt { get; set; }
+    public double? LimitWeek { get; set; }
+    public DateTimeOffset? LimitWeekAt { get; set; }
     /// <summary>A release the user said No to: not offered again at start (Help still offers it).</summary>
     public string? SkippedVersion { get; set; }
     public Dictionary<string, string> Sessions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
