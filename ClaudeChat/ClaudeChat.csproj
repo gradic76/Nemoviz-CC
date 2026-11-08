@@ -9,7 +9,7 @@
     <AssemblyName>ClaudeChat</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>NemovizCC.ico</ApplicationIcon>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Product>Nemoviz CC</Product>
     <Company>Nemoguća vizija</Company>
     <Authors>Nemoguća vizija; Claude (Anthropic)</Authors>
