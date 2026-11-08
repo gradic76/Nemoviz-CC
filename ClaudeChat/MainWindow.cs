@@ -305,6 +305,9 @@ internal sealed partial class MainWindow
         Win32.AppendMenuW(session, Win32.MF_STRING | (_settings.ResumeAfterLimit ? Win32.MF_CHECKED : 0), IdmResume, _loc["menu.session.resume"]);
         Win32.AppendMenuW(session, Win32.MF_STRING, IdmHandoff, _loc["menu.session.handoff"]);
         Win32.AppendMenuW(session, Win32.MF_SEPARATOR, IntPtr.Zero, null);
+        Win32.AppendMenuW(session, Win32.MF_STRING, IdmRunProgram, _loc["menu.session.run"]);
+        Win32.AppendMenuW(session, Win32.MF_STRING, IdmChangeProgram, _loc["menu.session.changeProgram"]);
+        Win32.AppendMenuW(session, Win32.MF_SEPARATOR, IntPtr.Zero, null);
         Win32.AppendMenuW(session, Win32.MF_STRING, IdmDeleteCurrent, _loc["menu.session.delete"]);
         Win32.AppendMenuW(bar, Win32.MF_POPUP, session, _loc["menu.session"]);
 
@@ -313,6 +316,7 @@ internal sealed partial class MainWindow
 
         IntPtr help = Win32.CreatePopupMenu();
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmHelp, _loc["menu.help.help"]);
+        Win32.AppendMenuW(help, Win32.MF_STRING, IdmWhatsNew, _loc["menu.help.whatsnew"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmKeys, _loc["menu.help.keys"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmLogin, _loc["menu.file.login"]);
         Win32.AppendMenuW(help, Win32.MF_STRING, IdmCheckUpdates, _loc["menu.help.updates"]);
@@ -826,6 +830,9 @@ internal sealed partial class MainWindow
             case IdmOrganizer: ShowOrganizer(); break;
             case IdmLogin: StartLogin(); break;
             case IdmHelp: ShowHelp(); break;
+            case IdmWhatsNew: ShowWhatsNew(); break;
+            case IdmRunProgram: RunProgram(_hwnd, _project); break;
+            case IdmChangeProgram: ChangeProgram(); break;
             case IdmCheckUpdates: CheckForUpdates(manual: true); break;
             case IdmInstallClaude: OfferClaudeInstall(); break;
             case IdmOpenExisting: OpenProject(); break;
@@ -892,6 +899,9 @@ internal sealed partial class MainWindow
 
             case Win32.WM_KEYDOWN when vk == 0x70 /* F1 */:
                 ShowHelp();
+                return true;
+            case Win32.WM_KEYDOWN when vk == 0x74 /* F5 */:
+                RunProgram(_hwnd, _project);
                 return true;
             case Win32.WM_KEYDOWN:
                 bool ctrl = Win32.KeyDown(Win32.VK_CONTROL), shift = Win32.KeyDown(Win32.VK_SHIFT);

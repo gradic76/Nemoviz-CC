@@ -21,7 +21,7 @@ namespace ClaudeChat;
 /// </summary>
 internal sealed partial class MainWindow
 {
-    private const int IdmCheckUpdates = 402, IdmHelp = 403;
+    private const int IdmCheckUpdates = 402, IdmHelp = 403, IdmWhatsNew = 404;
     private const string Repo = "gradic76/Nemoviz-CC";
     private const string SetupAsset = "NemovizCC-Setup.exe", ZipAsset = "NemovizCC-portable.zip";
     private bool _updateBusy;
@@ -159,11 +159,14 @@ internal sealed partial class MainWindow
 
     // ------------------------------------------------------------------ help
 
-    private void ShowHelp()
+    private void ShowHelp() => ShowHtml("Pomoc.html", "Help.html");
+    private void ShowWhatsNew() => ShowHtml("Novosti.html", "WhatsNew.html");
+
+    private void ShowHtml(string croatian, string english)
     {
         string dir = Path.Combine(AppContext.BaseDirectory, "help");
-        string file = Path.Combine(dir, _loc.Code.StartsWith("hr", StringComparison.OrdinalIgnoreCase) ? "Pomoc.html" : "Help.html");
-        if (!File.Exists(file)) file = Path.Combine(dir, "Help.html");
+        string file = Path.Combine(dir, _loc.Code.StartsWith("hr", StringComparison.OrdinalIgnoreCase) ? croatian : english);
+        if (!File.Exists(file)) file = Path.Combine(dir, english);
         try { Process.Start(new ProcessStartInfo(file) { UseShellExecute = true }); }
         catch (Exception e) { Notice(_hwnd, e.Message); }
     }

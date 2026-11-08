@@ -160,7 +160,7 @@ internal sealed partial class MainWindow
     }
 
     /// <summary>The Open dialog with multiple selection; null when cancelled.</summary>
-    private List<string>? PickFiles(IntPtr owner, string initialDir)
+    private List<string>? PickFiles(IntPtr owner, string initialDir, string? title = null)
     {
         const int max = 32 * 1024;
         IntPtr buffer = Marshal.AllocHGlobal(max * 2);
@@ -176,7 +176,7 @@ internal sealed partial class MainWindow
                 lpstrFile = buffer,
                 nMaxFile = max,
                 lpstrInitialDir = initialDir,
-                lpstrTitle = _loc["attach.title"],
+                lpstrTitle = title ?? _loc["attach.title"],
                 Flags = Win32.OFN_EXPLORER | Win32.OFN_ALLOWMULTISELECT | Win32.OFN_FILEMUSTEXIST | Win32.OFN_PATHMUSTEXIST,
             };
             if (!Win32.GetOpenFileNameW(ref ofn)) return null;

@@ -20,7 +20,7 @@ namespace ClaudeChat;
 internal sealed partial class MainWindow
 {
     private const int IdOrgChats = 3910, IdOrgTree = 3911, IdOrgRename = 3912, IdOrgDelete = 3913, IdOrgDeleteDisk = 3914,
-        IdOrgMemory = 3915, IdOrgNewProject = 3916, IdOrgNewChat = 3917;
+        IdOrgMemory = 3915, IdOrgNewProject = 3916, IdOrgNewChat = 3917, IdOrgRun = 3918;
 
     private const uint TVM_DELETEITEM = 0x1101, TVM_EXPAND = 0x1102, TVM_GETNEXTITEM = 0x110A, TVM_SELECTITEM = 0x110B,
         TVM_HITTEST = 0x1111, TVM_INSERTITEMW = 0x1132, TVM_GETITEMW = 0x113E, TVM_SETITEMW = 0x113F;
@@ -64,7 +64,7 @@ internal sealed partial class MainWindow
         var buttons = new List<IntPtr>();
         foreach (var (id, key) in new[]
         {
-            (IdOrgDelete, "org.delete"), (IdOrgDeleteDisk, "org.deleteDisk"), (IdOrgRename, "org.renameItem"), (IdOrgMemory, "org.memory"),
+            (IdOrgDelete, "org.delete"), (IdOrgDeleteDisk, "org.deleteDisk"), (IdOrgRename, "org.renameItem"), (IdOrgMemory, "org.memory"), (IdOrgRun, "org.run"),
             (IdOrgNewProject, "org.newProject"), (IdOrgNewChat, "org.newChat"), (FormCancel, "org.close"),
         })
             buttons.Add(FormChild(f, "BUTTON", NoAmp(_loc[key]), Win32.BS_PUSHBUTTON | Win32.WS_TABSTOP, 0, id));
@@ -262,6 +262,7 @@ internal sealed partial class MainWindow
                 case IdOrgDeleteDisk: Delete(true); break;
                 case IdOrgRename: Rename(); break;
                 case IdOrgMemory: Memory(); break;
+                case IdOrgRun: { var r = Target(); if (r == null) Win32.MessageBeep(0); else RunProgram(f.Hwnd, r.Folder); break; }
                 case IdOrgNewProject: after = NewProjectWizard; f.Result = FormCancel; f.Done = true; break;
                 case IdOrgNewChat: after = NewChatWizard; f.Result = FormCancel; f.Done = true; break;
             }
@@ -270,7 +271,7 @@ internal sealed partial class MainWindow
         f.OnCommand = (id, code) =>
         {
             if (id == IdOrgChats && code == LBN_SETFOCUS) { inChats = true; return false; }
-            if (id is IdOrgDelete or IdOrgDeleteDisk or IdOrgRename or IdOrgMemory or IdOrgNewProject or IdOrgNewChat) { Command(id); return false; }
+            if (id is IdOrgDelete or IdOrgDeleteDisk or IdOrgRename or IdOrgMemory or IdOrgRun or IdOrgNewProject or IdOrgNewChat) { Command(id); return false; }
             if (id != FormOk) return false;
 
             // Enter: a conversation opens; on a project the branch opens or closes.
@@ -307,7 +308,7 @@ internal sealed partial class MainWindow
             if (!mouse) { Win32.GetWindowRect(ctl, out RECT rc); sx = rc.Left + S(24); sy = rc.Top + S(24); }
 
             IntPtr menu = Win32.CreatePopupMenu();
-            foreach (var (id, key) in new[] { (IdOrgDelete, "org.delete"), (IdOrgDeleteDisk, "org.deleteDisk"), (IdOrgRename, "org.renameItem"), (IdOrgMemory, "org.memory") })
+            foreach (var (id, key) in new[] { (IdOrgDelete, "org.delete"), (IdOrgDeleteDisk, "org.deleteDisk"), (IdOrgRename, "org.renameItem"), (IdOrgMemory, "org.memory"), (IdOrgRun, "org.run") })
                 Win32.AppendMenuW(menu, Win32.MF_STRING, (IntPtr)id, _loc[key]);
             Win32.SetForegroundWindow(f.Hwnd);
             int chosen = Win32.TrackPopupMenuEx(menu, Win32.TPM_RETURNCMD | Win32.TPM_RIGHTBUTTON, sx, sy, f.Hwnd, IntPtr.Zero);
