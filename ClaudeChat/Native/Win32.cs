@@ -418,6 +418,7 @@ internal static class Win32
     [DllImport("user32.dll")] public static extern IntPtr SetFocus(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern IntPtr GetFocus();
     [DllImport("user32.dll")] public static extern IntPtr GetAncestor(IntPtr hWnd, int flags);
+    [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern IntPtr GetNextDlgTabItem(IntPtr hDlg, IntPtr hCtl, bool previous);
     public const uint WM_CHANGEUISTATE = 0x0127;
     [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();

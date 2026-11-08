@@ -1417,7 +1417,7 @@ internal sealed partial class MainWindow
         AddEntry(_settings.AssistantName, text);
         _turnText.Clear();
         if (speak) PlayBell();
-        if (speak && _settings.SpeakReplies && Win32.GetFocus() != _live) _speech.Speak(text, false);
+        if (speak && _settings.SpeakReplies && Win32.GetFocus() != _live && WindowActive) _speech.Speak(text, false);
     }
 
     private void OnResult(ResultInfo r)
@@ -1585,7 +1585,7 @@ internal sealed partial class MainWindow
     {
         if (id == TimerStop) { ForceStop(); return; }
         if (id == TimerRestart) { CheckRestartRequest(); return; }
-        if (id == TimerSound) { UpdateTypingSound(); return; }
+        if (id == TimerSound) { UpdateTypingSound(); UpdateStopButton(); return; }
         if (id != TimerLimit) return;
         if (!ResumeChecked || _resumeAt == null) { CancelResumeTimer(); return; }
         if (DateTimeOffset.Now < _resumeAt.Value || _busy) return;
