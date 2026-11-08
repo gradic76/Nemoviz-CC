@@ -45,6 +45,7 @@
   "set.volumeTyping": "Glasnoća rada",
   "set.device": "Izlazni uređaj za zvukove",
   "set.device.default": "Zadani uređaj",
+  "speak.answeredBackground": "{0} je odgovorio.",
   "menu.help.help": "&Upute\tF1",
   "menu.help.updates": "Provjeri &ažuriranja…",
   "set.updates": "Provjeravaj ažuriranja pri pokretanju",

@@ -69,6 +69,9 @@ internal sealed partial class MainWindow
         };
         Win32.FlashWindowEx(ref info);
         _flashing = true;
+        // Neither JAWS nor NVDA reports the flash (measured with both, 2026-11-08), so one short
+        // sentence says it, heard from any program; the answer itself stays in History.
+        _speech.Speak(_loc.Format("speak.answeredBackground", _settings.AppName), false);
     }
 
     private bool _flashing;

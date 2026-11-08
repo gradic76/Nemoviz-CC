@@ -45,6 +45,7 @@
   "set.volumeTyping": "Working volume",
   "set.device": "Output device for sounds",
   "set.device.default": "Default device",
+  "speak.answeredBackground": "{0} has answered.",
   "menu.help.help": "&Help\tF1",
   "menu.help.updates": "Check for &updates…",
   "set.updates": "Check for updates at start",
