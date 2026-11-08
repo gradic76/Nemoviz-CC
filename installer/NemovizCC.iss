@@ -114,6 +114,14 @@ Name: "{autodesktop}\{#AppInstall}"; Filename: "{app}\{#AppExe}"; WorkingDir: "{
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppInstall}}"; \
     Flags: nowait postinstall skipifsilent runasoriginaluser
+; A silent update (the program runs setup with /relaunch=1) opens the program again by itself.
+Filename: "{app}\{#AppExe}"; Flags: nowait postinstall runasoriginaluser; Check: RelaunchRequested
 
 ; Nothing of the user's is deleted on uninstall: settings and state are in %APPDATA%\ClaudeChat,
 ; conversations in %USERPROFILE%\.claude, projects wherever the user keeps them.
+
+[Code]
+function RelaunchRequested: Boolean;
+begin
+  Result := ExpandConstant('{param:relaunch|0}') = '1';
+end;

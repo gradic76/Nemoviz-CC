@@ -30,6 +30,13 @@ internal static class Program
         for (int i = 0; i < args.Length; i++)
         {
             string a = args[i];
+            if (a.StartsWith("--wait-pid=", StringComparison.OrdinalIgnoreCase))
+            {
+                // A portable update starts the new exe before the old one has closed.
+                if (int.TryParse(a[11..], out int pid))
+                    try { System.Diagnostics.Process.GetProcessById(pid).WaitForExit(20000); } catch { }
+                continue;
+            }
             string? Next() => i + 1 < args.Length ? args[++i] : null;
             switch (a.ToLowerInvariant())
             {

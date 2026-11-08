@@ -167,6 +167,7 @@ internal sealed partial class MainWindow
             AddEntry(_loc["role.system"], _loc.Format("history.error", "History context menu: SetWindowSubclass failed"));
         RestoreDraft();
         InitSounds();
+        RemoveOldFiles();
         AutoCheckForUpdates();
         try { File.Delete(RestartFlag); } catch { } // a request older than this window is stale
         Win32.SetTimer(_hwnd, (IntPtr)TimerRestart, 2000, IntPtr.Zero);
@@ -1615,7 +1616,7 @@ internal sealed partial class MainWindow
     {
         if (id == TimerStop) { ForceStop(); return; }
         if (id == TimerRestart) { CheckRestartRequest(); return; }
-        if (id == TimerSound) { UpdateTypingSound(); UpdateStopButton(); StopFlashWhenActive(); return; }
+        if (id == TimerSound) { UpdateTypingSound(); UpdateStopButton(); StopFlashWhenActive(); InstallWhenIdle(); return; }
         if (id != TimerLimit) return;
         if (!ResumeChecked || _resumeAt == null) { CancelResumeTimer(); return; }
         if (DateTimeOffset.Now < _resumeAt.Value || _busy) return;
