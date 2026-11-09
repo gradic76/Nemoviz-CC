@@ -516,7 +516,6 @@ internal sealed partial class MainWindow
 
     private void OnContext(long used, long window)
     {
-        _contextTokens = used;
         _ctxPercent = (int)Math.Round(100.0 * used / window);
         _ctxText = _loc.Format("ind.context", _ctxPercent, used / 1000, window / 1000);
         ShowIndicators();
@@ -1254,6 +1253,7 @@ internal sealed partial class MainWindow
         _state.Sessions.TryGetValue(StateKey, out var sessionId);
         string? file = TranscriptReader.FindFile(_project, _lastSessionId ?? sessionId);
         if (file == null) return;
+        _autoModel = ModelInTranscript(file);
 
         List<TranscriptReader.Message> messages;
         try { messages = TranscriptReader.Load(file, _loc["history.image"], 500); }

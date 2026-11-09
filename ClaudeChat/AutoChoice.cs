@@ -13,16 +13,15 @@ namespace ClaudeChat;
 /// "Automatic" in the Model and Effort boxes (author, 2026-11-09): before a message goes out, a
 /// short one-off Haiku call rates how demanding it is, and the conversation continues with the
 /// model and effort that fit. About 2 seconds and a few hundred tokens, measured.
-/// Effort can change freely. A new model cannot reuse the prompt cache (measured: the whole
-/// context is written again), so in a long conversation the model only ever goes up.
+/// Effort is rated for every message: changing it keeps the prompt cache. A new model does not
+/// (measured: the whole context is written again), so the model is chosen once, on a
+/// conversation's first message, and after that it can only go up.
 /// Fable runs on credits only and is deliberately not among the choices.
 /// </summary>
 internal sealed partial class MainWindow
 {
     private const string AutoChoice = "auto";
     private const int EstimatorTimeoutMs = 20_000;
-    /// <summary>Above this many tokens of context a weaker model is not worth a rewritten cache.</summary>
-    private const long ModelDowngradeContextLimit = 100_000;
 
     private static readonly string[] AutoModels = { "haiku", "sonnet", "opus" };
     private static readonly string[] AutoEfforts = { "low", "medium", "high", "xhigh", "max" };
@@ -42,7 +41,6 @@ internal sealed partial class MainWindow
 
     // What the estimate last chose (null until the first one), and what the running process was started with.
     private string? _autoModel, _autoEffort, _sessionModel, _sessionEffort;
-    private long _contextTokens;
     private string? _estimateText;
     private int _estimateId;
     private volatile Process? _estimator;
@@ -50,10 +48,25 @@ internal sealed partial class MainWindow
     private string? EffectiveModel => _settings.Model == AutoChoice ? _autoModel : _settings.Model;
     private string? EffectiveEffort => _settings.Effort == AutoChoice ? _autoEffort : _settings.Effort;
 
+    /// <summary>An existing conversation keeps the model it was last answered with: the newest
+    /// "model" field near the end of its file. Null for a model outside the automatic choices.</summary>
+    private static string? ModelInTranscript(string file)
+    {
+        try
+        {
+            const int Tail = 256 * 1024;
+            using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            stream.Seek(Math.Max(0, stream.Length - Tail), SeekOrigin.Begin);
+            string text = new StreamReader(stream, Encoding.UTF8).ReadToEnd();
+            var found = Regex.Matches(text, "\"model\":\"claude-([a-z]+)-");
+            return found.Count == 0 ? null : AutoModels.FirstOrDefault(m => m == found[found.Count - 1].Groups[1].Value);
+        }
+        catch (IOException) { return null; }
+    }
+
     private void ResetAutoChoice()
     {
         _autoModel = _autoEffort = null;
-        _contextTokens = 0;
     }
 
     /// <summary>Rates the message in the background, then sends it. Stop still works meanwhile.</summary>
@@ -98,8 +111,7 @@ internal sealed partial class MainWindow
             string? wanted = Array.IndexOf(AutoModels, model) >= 0 ? model : _autoModel;
             // A failed estimate (null) leaves Claude Code's own default; "same" with nothing before it does not.
             if (wanted == null && model == "same") wanted = "sonnet";
-            bool weaker = wanted != null && _autoModel != null && Array.IndexOf(AutoModels, wanted) < Array.IndexOf(AutoModels, _autoModel);
-            if (!(weaker && _contextTokens > ModelDowngradeContextLimit)) _autoModel = wanted;
+            if (_autoModel == null || Array.IndexOf(AutoModels, wanted) > Array.IndexOf(AutoModels, _autoModel)) _autoModel = wanted;
         }
         if (_settings.Effort == AutoChoice)
         {
