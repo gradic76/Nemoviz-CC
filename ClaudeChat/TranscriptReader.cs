@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace ClaudeChat;
@@ -25,7 +24,7 @@ public static class TranscriptReader
     public static string FolderFor(string projectFolder)
     {
         string key = new string(Path.GetFullPath(projectFolder).TrimEnd('\\')
-            .Select(c => char.IsAsciiLetterOrDigit(c) ? c : '-').ToArray());
+            .Select(c => Compat.IsAsciiLetterOrDigit(c) ? c : '-').ToArray());
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude", "projects", key);
     }
 
@@ -66,52 +65,49 @@ public static class TranscriptReader
         while ((line = reader.ReadLine()) != null)
         {
             if (line.Length == 0 || line[0] != '{') continue;
-            JsonDocument doc;
-            try { doc = JsonDocument.Parse(line); }
+            JsonNode? root;
+            try { root = JsonNode.Parse(line); }
             catch (JsonException) { continue; }
-            using (doc)
+
+            string type = Str(root, "type");
+            if (type != "user" && type != "assistant") continue;
+            if (Bool(root, "isMeta") || Bool(root, "isSidechain") || Bool(root, "isCompactSummary")) continue;
+            var content = root?["message"]?["content"];
+            if (content == null) continue;
+            DateTime time = DateTime.TryParse(Str(root, "timestamp"), null, System.Globalization.DateTimeStyles.RoundtripKind, out var t)
+                ? t.ToLocalTime() : DateTime.Now;
+
+            if (type == "assistant")
             {
-                var root = doc.RootElement;
-                string type = Str(root, "type");
-                if (type != "user" && type != "assistant") continue;
-                if (Bool(root, "isMeta") || Bool(root, "isSidechain") || Bool(root, "isCompactSummary")) continue;
-                if (!root.TryGetProperty("message", out var msg) || !msg.TryGetProperty("content", out var content)) continue;
-                DateTime time = root.TryGetProperty("timestamp", out var ts) && ts.ValueKind == JsonValueKind.String
-                                && DateTime.TryParse(ts.GetString(), null, System.Globalization.DateTimeStyles.RoundtripKind, out var t)
-                    ? t.ToLocalTime() : DateTime.Now;
-
-                if (type == "assistant")
-                {
-                    if (content.ValueKind != JsonValueKind.Array) continue;
-                    foreach (var block in content.EnumerateArray())
-                        if (Str(block, "type") == "text")
-                        {
-                            string text = Str(block, "text").Trim();
-                            if (text.Length == 0) continue;
-                            if (answer.Length > 0) answer.Append("\n\n");
-                            answer.Append(text);
-                            answerTime = time;
-                        }
-                    continue;
-                }
-
-                // user: a typed message is a string, or text/image blocks; tool results are not messages.
-                string said = UserText(content, imageNote);
-                if (said.Length == 0) continue;
-                FlushAnswer();
-                result.Add(new Message(Speaker.User, time, said));
+                if (content is not JsonArray blocks) continue;
+                foreach (var block in blocks)
+                    if (Str(block, "type") == "text")
+                    {
+                        string text = Str(block, "text").Trim();
+                        if (text.Length == 0) continue;
+                        if (answer.Length > 0) answer.Append("\n\n");
+                        answer.Append(text);
+                        answerTime = time;
+                    }
+                continue;
             }
+
+            // user: a typed message is a string, or text/image blocks; tool results are not messages.
+            string said = UserText(content, imageNote);
+            if (said.Length == 0) continue;
+            FlushAnswer();
+            result.Add(new Message(Speaker.User, time, said));
         }
         FlushAnswer();
         return result.Count > maxMessages ? result.GetRange(result.Count - maxMessages, maxMessages) : result;
     }
 
-    private static string UserText(JsonElement content, string imageNote)
+    private static string UserText(JsonNode content, string imageNote)
     {
         var parts = new List<string>();
-        if (content.ValueKind == JsonValueKind.String) parts.Add(content.GetString() ?? "");
-        else if (content.ValueKind == JsonValueKind.Array)
-            foreach (var block in content.EnumerateArray())
+        if (content is JsonValue v && v.GetValueKind() == JsonValueKind.String) parts.Add(v.GetValue<string>());
+        else if (content is JsonArray blocks)
+            foreach (var block in blocks)
             {
                 string bt = Str(block, "type");
                 if (bt == "tool_result") return "";
@@ -129,9 +125,8 @@ public static class TranscriptReader
         return text;
     }
 
-    private static string Str(JsonElement e, string name) =>
-        e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
+    private static string Str(JsonNode? e, string name) =>
+        e?[name] is JsonValue v && v.GetValueKind() == JsonValueKind.String ? v.GetValue<string>() : "";
 
-    private static bool Bool(JsonElement e, string name) =>
-        e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.True;
+    private static bool Bool(JsonNode? e, string name) => e?[name]?.GetValueKind() == JsonValueKind.True;
 }

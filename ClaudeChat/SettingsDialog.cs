@@ -284,8 +284,8 @@ internal sealed partial class MainWindow
 
     // Volumes 10 %, 20 % … 100 %.
     private static void FillVolume(IntPtr combo, int percent) =>
-        Fill(combo, Enumerable.Range(1, 10).Select(v => $"{v * 10} %"), Math.Clamp((int)Math.Round(percent / 10.0) - 1, 0, 9));
-    private static int VolumeOf(IntPtr combo) => (Math.Clamp(Selected(combo), 0, 9) + 1) * 10;
+        Fill(combo, Enumerable.Range(1, 10).Select(v => $"{v * 10} %"), Compat.Clamp((int)Math.Round(percent / 10.0) - 1, 0, 9));
+    private static int VolumeOf(IntPtr combo) => (Compat.Clamp(Selected(combo), 0, 9) + 1) * 10;
 
     private void LoadSettingsIntoDialog()
     {
@@ -329,9 +329,9 @@ internal sealed partial class MainWindow
         var langs = Localization.Available();
         int li = Selected(_cbLang);
         string lang = li <= 0 || li - 1 >= langs.Count ? "auto" : langs[li - 1].Code;
-        string theme = ThemeChoices[Math.Clamp(Selected(_cbTheme), 0, 2)];
-        double font = FontChoices[Math.Clamp(Selected(_cbFont), 0, FontChoices.Length - 1)] / 100.0;
-        int handoff = HandoffChoices[Math.Clamp(Selected(_cbHandoff), 0, HandoffChoices.Length - 1)];
+        string theme = ThemeChoices[Compat.Clamp(Selected(_cbTheme), 0, 2)];
+        double font = FontChoices[Compat.Clamp(Selected(_cbFont), 0, FontChoices.Length - 1)] / 100.0;
+        int handoff = HandoffChoices[Compat.Clamp(Selected(_cbHandoff), 0, HandoffChoices.Length - 1)];
         int di = Selected(_cbDevice);
         string? device = di <= 0 || di - 1 >= _dlgDevices.Count ? null : _dlgDevices[di - 1];
 
@@ -339,7 +339,7 @@ internal sealed partial class MainWindow
         bool themeChanged = !theme.Equals(_settings.Theme, StringComparison.OrdinalIgnoreCase);
         bool fontChanged = Math.Abs(font - _settings.FontScale) > 0.001;
 
-        void Save(string key, System.Text.Json.Nodes.JsonNode? value) => _settings.SaveEffectiveValue(_project, key, value);
+        void Save(string key, JsonNode? value) => _settings.SaveEffectiveValue(_project, key, value);
         _settings.Language = lang; Save("language", lang);
         _settings.Theme = theme; Save("theme", theme);
         _settings.FontScale = font; Save("fontScale", font);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using ClaudeChat.Native;
 
 namespace ClaudeChat;
@@ -26,7 +25,7 @@ internal sealed partial class MainWindow
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         try
         {
-            if (File.Exists(ProgramsFile) && JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(ProgramsFile)) is { } read)
+            if (File.Exists(ProgramsFile) && Json.Read<Dictionary<string, string>>(File.ReadAllText(ProgramsFile)) is { } read)
                 foreach (var kv in read) map[kv.Key] = kv.Value;
         }
         catch { }
@@ -45,7 +44,7 @@ internal sealed partial class MainWindow
         try
         {
             Directory.CreateDirectory(Settings.AppDataFolder);
-            File.WriteAllText(ProgramsFile, JsonSerializer.Serialize(map, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(ProgramsFile, Json.Write(map));
         }
         catch (Exception e) { Notice(owner, _loc.Format("prog.failed", e.Message)); }
         return path;

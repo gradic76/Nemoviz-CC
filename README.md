@@ -15,7 +15,7 @@ Program nije digitalno potpisan, pa Windows pri prvom pokretanju može pokazati 
 
 ### Što treba
 
-- Windows 10 ili 11, 64-bitni. .NET nije potrebno instalirati, ide uz program.
+- Windows 10 (od inačice 1903) ili 11, 64-bitni. Ništa dodatno nije potrebno instalirati: .NET Framework 4.8 već je u sustavu.
 - Pretplata na Claude (Pro ili Max).
 - Claude Code. Ako ga program ne nađe, ponudi službenu instalaciju. Ako koristiš Claudeovu desktop aplikaciju s Code dijelom, Claude Code već imaš.
 
@@ -67,7 +67,7 @@ The program is not digitally signed, so Windows SmartScreen may warn on first st
 
 ### Requirements
 
-- Windows 10 or 11, 64-bit. No .NET installation needed; it comes with the program.
+- Windows 10 (version 1903 or later) or 11, 64-bit. Nothing else to install: .NET Framework 4.8 is part of the system.
 - A Claude subscription (Pro or Max).
 - Claude Code. If the program cannot find it, it offers the official installer. If you use Claude's desktop app with its Code part, you already have it.
 

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json.Nodes;
 using ClaudeChat.Native;
 
 namespace ClaudeChat;
@@ -17,6 +16,7 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        EnableModernTls();
         Win32.CoInitializeEx(IntPtr.Zero, Win32.COINIT_APARTMENTTHREADED);
         var icc = new INITCOMMONCONTROLSEX
         {
@@ -33,7 +33,7 @@ internal static class Program
             if (a.StartsWith("--wait-pid=", StringComparison.OrdinalIgnoreCase))
             {
                 // A portable update starts the new exe before the old one has closed.
-                if (int.TryParse(a[11..], out int pid))
+                if (int.TryParse(a.Substring(11), out int pid))
                     try { System.Diagnostics.Process.GetProcessById(pid).WaitForExit(20000); } catch { }
                 continue;
             }
@@ -71,6 +71,14 @@ internal static class Program
 
         var window = new MainWindow(userFile, cli, state, loc, project);
         return window.Run();
+    }
+
+    /// <summary>TLS 1.2 for GitHub; 1.3 as well where Windows has it (Windows 11 onwards).</summary>
+    private static void EnableModernTls()
+    {
+        var protocols = System.Net.SecurityProtocolType.Tls12;
+        if (Environment.OSVersion.Version.Build >= 22000) protocols |= System.Net.SecurityProtocolType.Tls13;
+        System.Net.ServicePointManager.SecurityProtocol = protocols;
     }
 
     /// <summary>First start: the projects folder (DocumentsClaude unless the user picks another),

@@ -56,7 +56,7 @@ public sealed class Sound
                 for (int ch = 0; ch < 2; ch++)
                 {
                     float v = Sample(i0, ch) * (1 - f) + Sample(i1, ch) * f;
-                    outS[i * 2 + ch] = (short)Math.Clamp(v * 32767f, -32768f, 32767f);
+                    outS[i * 2 + ch] = (short)Compat.Clamp(v * 32767f, -32768f, 32767f);
                 }
             }
             return new Sound(outS);
@@ -86,7 +86,7 @@ public sealed class AudioEngine : IDisposable
     private float _volume = 0.8f;
     private uint _device = WaveMapper;
 
-    public float Volume { get => _volume; set => _volume = Math.Clamp(value, 0f, 1f); }
+    public float Volume { get => _volume; set => _volume = Compat.Clamp(value, 0f, 1f); }
 
     private volatile bool _keepAwake;
     /// <summary>Keeps the output device open and fed with an inaudible signal (±1 LSB), so HDMI
@@ -125,7 +125,7 @@ public sealed class AudioEngine : IDisposable
     public object? Play(Sound? sound, bool loop = false, float gain = 1f)
     {
         if (sound == null) return null;
-        var v = new Voice { Sound = sound, Loop = loop, Gain = Math.Clamp(gain, 0f, 10f) };
+        var v = new Voice { Sound = sound, Loop = loop, Gain = Compat.Clamp(gain, 0f, 10f) };
         lock (_lock) _voices.Add(v);
         EnsureRunning();
         return v;
@@ -134,7 +134,7 @@ public sealed class AudioEngine : IDisposable
     /// <summary>Changes the volume of a playing sound (0–1), e.g. the looping Typing.</summary>
     public void SetGain(object? handle, float gain)
     {
-        if (handle is Voice v) v.Gain = Math.Clamp(gain, 0f, 10f);
+        if (handle is Voice v) v.Gain = Compat.Clamp(gain, 0f, 10f);
     }
 
     public void Stop(object? handle)
@@ -218,7 +218,7 @@ public sealed class AudioEngine : IDisposable
 
     private void Fill(IntPtr header, int[] mix, short[] pcm, ref int idleBuffers)
     {
-        Array.Clear(mix);
+        Array.Clear(mix, 0, mix.Length);
         bool any;
         lock (_lock)
         {
@@ -242,7 +242,7 @@ public sealed class AudioEngine : IDisposable
         }
         idleBuffers = any ? 0 : idleBuffers + 1;
         float vol = _volume;
-        for (int i = 0; i < mix.Length; i++) pcm[i] = (short)Math.Clamp(mix[i] * vol, -32768f, 32767f);
+        for (int i = 0; i < mix.Length; i++) pcm[i] = (short)Compat.Clamp(mix[i] * vol, -32768f, 32767f);
         if (!any && _keepAwake)
             for (int i = 0; i < pcm.Length; i++) pcm[i] = (short)((i & 2) == 0 ? 1 : -1); // -90 dB: not silence to the device, nothing to the ear
         var h = Marshal.PtrToStructure<WAVEHDR>(header);

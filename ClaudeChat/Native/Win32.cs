@@ -458,7 +458,7 @@ internal static class Win32
 
     [DllImport("user32.dll")] public static extern IntPtr CreateMenu();
     [DllImport("user32.dll")] public static extern IntPtr CreatePopupMenu();
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern bool AppendMenuW(IntPtr menu, uint flags, IntPtr id, string? text);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern bool AppendMenuW(IntPtr menu, uint flags, nint id, string? text);
     [DllImport("user32.dll")] public static extern bool SetMenu(IntPtr hWnd, IntPtr menu);
     [DllImport("user32.dll")] public static extern IntPtr GetMenu(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern bool DestroyMenu(IntPtr menu);

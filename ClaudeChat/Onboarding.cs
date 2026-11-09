@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json.Nodes;
 using ClaudeChat.Native;
 
 namespace ClaudeChat;
@@ -115,8 +114,7 @@ internal sealed partial class MainWindow
         try
         {
             var psi = new ProcessStartInfo("powershell.exe") { UseShellExecute = true };
-            foreach (var a in new[] { "-NoExit", "-ExecutionPolicy", "Bypass", "-Command", "irm https://claude.ai/install.ps1 | iex" })
-                psi.ArgumentList.Add(a);
+            psi.Arguments = Compat.JoinArguments(new[] { "-NoExit", "-ExecutionPolicy", "Bypass", "-Command", "irm https://claude.ai/install.ps1 | iex" });
             Process.Start(psi);
         }
         catch (Exception e) { AddEntry(_loc["role.system"], e.Message); }

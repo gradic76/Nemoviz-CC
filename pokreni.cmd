@@ -6,7 +6,7 @@ rem With --restart (the window calls it so after a new build) it first waits, up
 rem 20 seconds, for the running window to close, so the copy is not locked.
 setlocal
 set "ROOT=%~dp0"
-set "BUILD=%ROOT%ClaudeChat\bin\Release\net10.0-windows"
+set "BUILD=%ROOT%ClaudeChat\bin\Release\net48"
 set "APP=%ROOT%app"
 
 if /i not "%~1"=="--restart" goto copy

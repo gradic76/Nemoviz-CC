@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace ClaudeChat;
 
@@ -115,29 +113,15 @@ public sealed class Settings
 
     // ---------------------------------------------------------------------
 
-    internal static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true,
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
-    private static readonly JsonNodeOptions NodeOptions = new() { PropertyNameCaseInsensitive = true };
-    private static readonly JsonDocumentOptions DocOptions = new()
-    {
-        CommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true,
-    };
-
     /// <summary>The file user-level changes (theme, language, check box) are written to.</summary>
     public string UserFile { get; private set; } = "";
     public List<string> LoadedFiles { get; } = new();
     public List<string> Problems { get; } = new();
 
+    /// <summary>NEMOVIZ_DATA_DIR gives a test copy its own settings and state, away from the running window.</summary>
     public static string AppDataFolder =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ClaudeChat");
+        Environment.GetEnvironmentVariable("NEMOVIZ_DATA_DIR") is { Length: > 0 } dir ? dir
+        : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ClaudeChat");
 
     public static string ResolveUserFile(string? explicitConfig)
     {
@@ -152,7 +136,7 @@ public sealed class Settings
     /// <summary>Loads defaults + user file + (optional) project file + command-line overrides.</summary>
     public static Settings Load(string userFile, string? projectFolder, JsonObject? commandLine)
     {
-        var merged = JsonSerializer.SerializeToNode(new Settings(), JsonOptions)!.AsObject();
+        var merged = Json.ToNode(new Settings())!.AsObject();
         var loaded = new List<string>();
         var problems = new List<string>();
 
@@ -161,7 +145,7 @@ public sealed class Settings
             if (!File.Exists(file)) return;
             try
             {
-                var node = JsonNode.Parse(File.ReadAllText(file), NodeOptions, DocOptions);
+                var node = JsonNode.ParseLenient(File.ReadAllText(file));
                 if (node is JsonObject obj) { Merge(merged, obj); loaded.Add(file); }
             }
             catch (Exception ex) { problems.Add($"{file}: {ex.Message}"); }
@@ -172,7 +156,7 @@ public sealed class Settings
         if (commandLine != null) Merge(merged, commandLine);
 
         Settings s;
-        try { s = merged.Deserialize<Settings>(JsonOptions) ?? new Settings(); }
+        try { s = Json.To<Settings>(merged) ?? new Settings(); }
         catch (Exception ex) { problems.Add(ex.Message); s = new Settings(); }
         s.UserFile = userFile;
         s.LoadedFiles.AddRange(loaded);
@@ -202,7 +186,7 @@ public sealed class Settings
         return null;
     }
 
-    private static string ToCamel(string s) => s.Length == 0 ? s : char.ToLowerInvariant(s[0]) + s[1..];
+    private static string ToCamel(string s) => s.Length == 0 ? s : char.ToLowerInvariant(s[0]) + s.Substring(1);
 
     /// <summary>Writes one value into the user file, keeping everything else in it.</summary>
     public void SaveUserValue(string key, JsonNode? value) => SaveValue(UserFile, key, value);
@@ -218,7 +202,7 @@ public sealed class Settings
             string pf = ProjectFileFor(projectFolder);
             try
             {
-                if (File.Exists(pf) && JsonNode.Parse(File.ReadAllText(pf), NodeOptions, DocOptions) is JsonObject o
+                if (File.Exists(pf) && JsonNode.ParseLenient(File.ReadAllText(pf)) is JsonObject o
                     && FindKey(o, key) != null)
                 {
                     SaveValue(pf, key, value);
@@ -237,14 +221,14 @@ public sealed class Settings
             JsonObject root = new();
             if (File.Exists(file))
             {
-                var node = JsonNode.Parse(File.ReadAllText(file), NodeOptions, DocOptions);
+                var node = JsonNode.ParseLenient(File.ReadAllText(file));
                 if (node is JsonObject obj) root = obj;
             }
             string? existing = FindKey(root, key);
             if (existing != null) root.Remove(existing);
             if (value != null) root[key] = value;
             Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-            File.WriteAllText(file, root.ToJsonString(JsonOptions));
+            File.WriteAllText(file, root.ToJsonString(indented: true));
         }
         catch (Exception ex) { Problems.Add($"{file}: {ex.Message}"); }
     }
@@ -283,7 +267,7 @@ public sealed class AppState
         try
         {
             if (File.Exists(FilePath))
-                return JsonSerializer.Deserialize<AppState>(File.ReadAllText(FilePath), Settings.JsonOptions) ?? new AppState();
+                return Json.Read<AppState>(File.ReadAllText(FilePath)) ?? new AppState();
         }
         catch { /* a broken state file only costs the remembered session */ }
         return new AppState();
@@ -294,7 +278,7 @@ public sealed class AppState
         try
         {
             Directory.CreateDirectory(Settings.AppDataFolder);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, Settings.JsonOptions));
+            File.WriteAllText(FilePath, Json.Write(this));
         }
         catch { }
     }

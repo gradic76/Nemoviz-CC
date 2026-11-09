@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace ClaudeChat;
@@ -89,8 +88,7 @@ public static class SessionCatalog
                 if (!isTitle && (first != null || !line.Contains("\"type\":\"user\""))) continue;
                 try
                 {
-                    using var doc = JsonDocument.Parse(line);
-                    var root = doc.RootElement;
+                    var root = JsonNode.Parse(line);
                     string type = Str(root, "type");
                     if (type == "custom-title") title = Str(root, "customTitle") is { Length: > 0 } t ? t : title;
                     else if (type == "summary" && title == null) title = Str(root, "summary") is { Length: > 0 } s ? s : null;
@@ -106,20 +104,20 @@ public static class SessionCatalog
         if (label != null)
         {
             label = Regex.Replace(label, @"\s+", " ").Trim();
-            if (label.Length > 60) label = label[..60].TrimEnd() + "…";
+            if (label.Length > 60) label = label.Substring(0, 60).TrimEnd() + "…";
         }
         return label;
     }
 
-    private static string? FirstText(JsonElement root)
+    private static string? FirstText(JsonNode? root)
     {
-        if (!root.TryGetProperty("message", out var msg) || !msg.TryGetProperty("content", out var content)) return null;
+        var content = root?["message"]?["content"];
         string text;
-        if (content.ValueKind == JsonValueKind.String) text = content.GetString() ?? "";
-        else if (content.ValueKind == JsonValueKind.Array)
+        if (content is JsonValue v && v.GetValueKind() == JsonValueKind.String) text = v.GetValue<string>();
+        else if (content is JsonArray blocks)
         {
             var sb = new StringBuilder();
-            foreach (var b in content.EnumerateArray())
+            foreach (var b in blocks)
             {
                 string bt = Str(b, "type");
                 if (bt == "tool_result") return null;
@@ -136,9 +134,8 @@ public static class SessionCatalog
         return text;
     }
 
-    private static string Str(JsonElement e, string name) =>
-        e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
+    private static string Str(JsonNode? e, string name) =>
+        e?[name] is JsonValue v && v.GetValueKind() == JsonValueKind.String ? v.GetValue<string>() : "";
 
-    private static bool Bool(JsonElement e, string name) =>
-        e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.True;
+    private static bool Bool(JsonNode? e, string name) => e?[name]?.GetValueKind() == JsonValueKind.True;
 }

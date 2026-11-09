@@ -5,9 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using ClaudeChat.Native;
 
@@ -82,7 +80,7 @@ internal sealed partial class MainWindow
                 var asset = (json?["assets"] as JsonArray)?.FirstOrDefault(a => a?["name"]?.GetValue<string>() == want);
                 string? url = asset?["browser_download_url"]?.GetValue<string>();
                 string? digest = asset?["digest"]?.GetValue<string>();
-                string? sha = digest != null && digest.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) ? digest[7..] : null;
+                string? sha = digest != null && digest.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) ? digest.Substring(7) : null;
                 var info = latest == null || url == null ? null
                     : new ReleaseInfo(latest, json?["body"]?.GetValue<string>() ?? "", want, url, asset?["size"]?.GetValue<long>() ?? 0, sha);
                 Post(() => OnUpdateInfo(manual, info));
@@ -179,10 +177,10 @@ internal sealed partial class MainWindow
                 if (good && r.Sha256 != null)
                 {
                     using var read = File.OpenRead(target + ".part");
-                    good = Convert.ToHexString(await SHA256.HashDataAsync(read)).Equals(r.Sha256, StringComparison.OrdinalIgnoreCase);
+                    good = Compat.Sha256Hex(read).Equals(r.Sha256, StringComparison.OrdinalIgnoreCase);
                 }
                 if (!good) throw new InvalidDataException(_loc["upd.badFile"]);
-                File.Move(target + ".part", target, overwrite: true);
+                Compat.MoveOverwrite(target + ".part", target);
                 Post(() => { SetLive(_loc["live.idle"]); _pendingInstall = target; InstallWhenIdle(announce: true); });
             }
             catch (Exception e)
@@ -224,8 +222,7 @@ internal sealed partial class MainWindow
         string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
         bool forAll = AppContext.BaseDirectory.StartsWith(programFiles, StringComparison.OrdinalIgnoreCase);
         var psi = new ProcessStartInfo(setup) { UseShellExecute = true };
-        foreach (var a in new[] { "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/relaunch=1", forAll ? "/ALLUSERS" : "/CURRENTUSER" })
-            psi.ArgumentList.Add(a);
+        psi.Arguments = Compat.JoinArguments(new[] { "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/relaunch=1", forAll ? "/ALLUSERS" : "/CURRENTUSER" });
         Process.Start(psi);
     }
 
@@ -244,7 +241,7 @@ internal sealed partial class MainWindow
                 {
                     string name = entry.FullName.Replace('\\', '/');
                     int slash = name.IndexOf('/');
-                    string relative = slash >= 0 ? name[(slash + 1)..] : name; // the zip has one top folder
+                    string relative = slash >= 0 ? name.Substring(slash + 1) : name; // the zip has one top folder
                     if (relative.Length == 0 || relative.EndsWith('/')) continue;
                     if (relative.Equals("settings.json", StringComparison.OrdinalIgnoreCase)) continue; // the user's
                     string dest = Path.GetFullPath(Path.Combine(root, relative));
@@ -259,7 +256,7 @@ internal sealed partial class MainWindow
             {
                 if (File.Exists(dest))
                 {
-                    File.Move(dest, dest + OldSuffix, overwrite: true);
+                    Compat.MoveOverwrite(dest, dest + OldSuffix);
                     replaced.Add(dest);
                 }
                 File.Move(dest + ".new", dest);
@@ -273,8 +270,7 @@ internal sealed partial class MainWindow
                 try { File.Delete(dest + ".new"); } catch { }
             throw;
         }
-        var psi = new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = false, WorkingDirectory = root };
-        psi.ArgumentList.Add($"--wait-pid={Environment.ProcessId}");
+        var psi = new ProcessStartInfo(Compat.ProcessPath, $"--wait-pid={Compat.ProcessId}") { UseShellExecute = false, WorkingDirectory = root };
         Process.Start(psi);
     }
 

@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using ClaudeChat.Native;
 
 namespace ClaudeChat;
@@ -68,7 +66,7 @@ internal sealed partial class MainWindow
 
     private static T? LoadWizardDraft<T>(string kind) where T : class
     {
-        try { return File.Exists(WizardDraftPath(kind)) ? JsonSerializer.Deserialize<T>(File.ReadAllText(WizardDraftPath(kind)), Settings.JsonOptions) : null; }
+        try { return File.Exists(WizardDraftPath(kind)) ? Json.Read<T>(File.ReadAllText(WizardDraftPath(kind))) : null; }
         catch { return null; }
     }
 
@@ -77,7 +75,7 @@ internal sealed partial class MainWindow
         try
         {
             Directory.CreateDirectory(Settings.AppDataFolder);
-            File.WriteAllText(WizardDraftPath(kind), JsonSerializer.Serialize(draft, Settings.JsonOptions));
+            File.WriteAllText(WizardDraftPath(kind), Json.Write(draft));
         }
         catch { }
     }
@@ -327,11 +325,11 @@ internal sealed partial class MainWindow
         void Line(string key, string value) => sb.Append(_loc[key]).Append(": ").Append(value).Append('\n');
         Line("wiz.proj.name", d.Name);
         Line("wiz.proj.folder", Path.Combine(ProjectsRoot, d.Name));
-        Line("wiz.proj.kind", KindTexts[Math.Clamp(d.Kind, 0, 4)]);
+        Line("wiz.proj.kind", KindTexts[Compat.Clamp(d.Kind, 0, 4)]);
         Line("wiz.proj.lang", d.WorkLanguage);
         Line("wiz.proj.tech", d.Technology.Length > 0 ? d.Technology : _loc["wiz.md.techAuto"]);
         Line("wiz.proj.a11y", Yes(d.Accessibility));
-        Line("wiz.proj.git", GitTexts[Math.Clamp(d.Git, 0, 2)] + (d.Git == 2
+        Line("wiz.proj.git", GitTexts[Compat.Clamp(d.Git, 0, 2)] + (d.Git == 2
             ? $" ({(d.RepoName.Length > 0 ? d.RepoName : d.Name)}, {(d.RepoPublic ? _loc["wiz.proj.publicWord"] : _loc["wiz.proj.privateWord"])})" : ""));
         Line("wiz.proj.perm", Choice(permChoices, d.Permission));
         Line("wiz.model", Choice(ModelChoices, d.Model));
@@ -348,11 +346,11 @@ internal sealed partial class MainWindow
         sb.Append("# ").Append(d.Name).Append("\n\n");
         if (d.Description.Length > 0) sb.Append(d.Description).Append("\n\n");
         sb.Append("## ").Append(_loc["wiz.md.basics"]).Append("\n\n");
-        sb.Append("- ").Append(_loc["wiz.proj.kind"]).Append(": ").Append(KindTexts[Math.Clamp(d.Kind, 0, 4)]).Append('\n');
+        sb.Append("- ").Append(_loc["wiz.proj.kind"]).Append(": ").Append(KindTexts[Compat.Clamp(d.Kind, 0, 4)]).Append('\n');
         if (d.WorkLanguage.Length > 0) sb.Append("- ").Append(_loc["wiz.proj.lang"]).Append(": ").Append(d.WorkLanguage).Append('\n');
         sb.Append("- ").Append(_loc["wiz.md.tech"]).Append(": ").Append(d.Technology.Length > 0 ? d.Technology : _loc["wiz.md.techAuto"]).Append('\n');
         sb.Append("- ").Append(_loc["wiz.md.a11y"]).Append(": ").Append(d.Accessibility ? _loc["wiz.md.a11yOn"] : _loc["wiz.md.a11yOff"]).Append('\n');
-        sb.Append("- Git: ").Append(GitTexts[Math.Clamp(d.Git, 0, 2)]).Append('\n');
+        sb.Append("- Git: ").Append(GitTexts[Compat.Clamp(d.Git, 0, 2)]).Append('\n');
         if (copied.Count > 0)
         {
             sb.Append("\n## ").Append(_loc["wiz.md.files"]).Append("\n\n");
@@ -389,7 +387,7 @@ internal sealed partial class MainWindow
             if (d.Permission != null) cfg["permissionMode"] = d.Permission;
             if (d.Model != null) cfg["model"] = d.Model;
             if (d.Effort != null) cfg["effort"] = d.Effort;
-            if (cfg.Count > 0) File.WriteAllText(Path.Combine(folder, ".claude-chat.json"), cfg.ToJsonString(Settings.JsonOptions), new UTF8Encoding(false));
+            if (cfg.Count > 0) File.WriteAllText(Path.Combine(folder, ".claude-chat.json"), cfg.ToJsonString(indented: true), new UTF8Encoding(false));
         }
         catch (Exception e)
         {
@@ -404,7 +402,7 @@ internal sealed partial class MainWindow
         AddEntry(_loc["role.system"], _loc.Format("wiz.proj.created", d.Name, folder));
         foreach (var n in notes) AddEntry(_loc["role.system"], n);
 
-        var msg = new StringBuilder(_loc.Format($"wiz.proj.msg.{Math.Clamp(d.Plan, 0, 1)}", d.Name));
+        var msg = new StringBuilder(_loc.Format($"wiz.proj.msg.{Compat.Clamp(d.Plan, 0, 1)}", d.Name));
         if (d.Git == 2)
             msg.Append("\n\n").Append(_loc.Format("wiz.proj.msgGitHub", d.RepoName.Length > 0 ? d.RepoName : d.Name,
                 d.RepoPublic ? _loc["wiz.proj.publicWord"] : _loc["wiz.proj.privateWord"]));
@@ -419,7 +417,7 @@ internal sealed partial class MainWindow
         try
         {
             var psi = new ProcessStartInfo(exe) { WorkingDirectory = folder, UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true, RedirectStandardOutput = true };
-            foreach (var a in args) psi.ArgumentList.Add(a);
+            psi.Arguments = Compat.JoinArguments(args);
             using var p = Process.Start(psi)!;
             string err = p.StandardError.ReadToEnd();
             p.StandardOutput.ReadToEnd();
@@ -434,7 +432,7 @@ internal sealed partial class MainWindow
     {
         try
         {
-            string exe = Environment.ProcessPath ?? throw new InvalidOperationException("no exe path");
+            string exe = Compat.ProcessPath;
             string args = $"--project \"{folder}\"";
             if (!string.IsNullOrEmpty(_settings.RestartCommand)) args += $" --restart-command \"{_settings.RestartCommand}\"";
             string lnk = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), $"{name} ({_settings.AppName}).lnk");

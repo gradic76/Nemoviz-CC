@@ -74,7 +74,7 @@ public static class ClaudeLocator
         try
         {
             string key = new string(Path.GetFullPath(projectFolder).TrimEnd('\\')
-                .Select(c => char.IsAsciiLetterOrDigit(c) ? c : '-').ToArray());
+                .Select(c => Compat.IsAsciiLetterOrDigit(c) ? c : '-').ToArray());
             string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude", "projects", key);
             return Directory.Exists(dir) && Directory.EnumerateFiles(dir, "*.jsonl").Any();
         }

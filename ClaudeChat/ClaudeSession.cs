@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 
 namespace ClaudeChat;
@@ -63,19 +61,17 @@ public sealed class ClaudeSession : IDisposable
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            StandardInputEncoding = new UTF8Encoding(false),
             StandardOutputEncoding = new UTF8Encoding(false),
             StandardErrorEncoding = new UTF8Encoding(false),
         };
-        foreach (var a in args) psi.ArgumentList.Add(a);
+        psi.Arguments = Compat.JoinArguments(args);
         foreach (var (k, v) in env) psi.Environment[k] = v;
 
         var p = new Process { StartInfo = psi, EnableRaisingEvents = true };
         p.Start();
         _process = p;
-        _stdin = p.StandardInput;
-        _stdin.AutoFlush = true;
-        _stdin.NewLine = "\n";
+        // ProcessStartInfo has no input encoding here: without this, Croatian letters reach Claude as ANSI.
+        _stdin = new StreamWriter(p.StandardInput.BaseStream, new UTF8Encoding(false)) { AutoFlush = true, NewLine = "\n" };
 
         new Thread(() => ReadStdout(p)) { IsBackground = true, Name = "claude-stdout" }.Start();
         new Thread(() => ReadStderr(p)) { IsBackground = true, Name = "claude-stderr" }.Start();
@@ -120,7 +116,7 @@ public sealed class ClaudeSession : IDisposable
         if (p == null) return;
         _killedProcess = p; // a deliberate stop is not reported as an unexpected exit
         try { _stdin?.Close(); } catch { }
-        try { if (!p.HasExited) p.Kill(entireProcessTree: true); } catch { }
+        try { if (!p.HasExited) Compat.KillTree(p); } catch { }
     }
 
     public void Dispose() => Kill();
@@ -352,6 +348,6 @@ public sealed class ClaudeSession : IDisposable
     private static string Shorten(string s)
     {
         s = s.Replace("\r", " ").Replace("\n", " ").Trim();
-        return s.Length > 140 ? s[..140] + "…" : s;
+        return s.Length > 140 ? s.Substring(0, 140) + "…" : s;
     }
 }

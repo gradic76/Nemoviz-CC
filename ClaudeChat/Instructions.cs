@@ -73,7 +73,7 @@ internal sealed partial class MainWindow
                     : "# " + Path.GetFileName(folder.TrimEnd('\\', '/')) + "\n\n";
                 File.WriteAllText(path, first, new UTF8Encoding(false));
             }
-            Process.Start(new ProcessStartInfo("notepad.exe") { ArgumentList = { path }, UseShellExecute = false });
+            Process.Start(new ProcessStartInfo("notepad.exe", Compat.QuoteArgument(path)) { UseShellExecute = false });
         }
         catch (Exception e) { AddEntry(_loc["role.system"], e.Message); }
     }

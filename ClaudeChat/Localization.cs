@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 
 namespace ClaudeChat;
 
@@ -95,20 +94,16 @@ public sealed class Localization
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);
         meta = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        using var doc = JsonDocument.Parse(json, new JsonDocumentOptions
+        if (JsonNode.ParseLenient(json) is not JsonObject root) return result;
+        foreach (var (name, value) in root)
         {
-            CommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-        });
-        foreach (var prop in doc.RootElement.EnumerateObject())
-        {
-            if (prop.Name == "_meta" && prop.Value.ValueKind == JsonValueKind.Object)
+            if (name == "_meta" && value is JsonObject metaObject)
             {
-                foreach (var m in prop.Value.EnumerateObject())
-                    meta[m.Name] = m.Value.ValueKind == JsonValueKind.String ? m.Value.GetString()! : m.Value.GetRawText();
+                foreach (var (key, item) in metaObject)
+                    if (item != null) meta[key] = item.ToString();
             }
-            else if (prop.Value.ValueKind == JsonValueKind.String)
-                result[prop.Name] = prop.Value.GetString()!;
+            else if (value is JsonValue text && text.GetValueKind() == JsonValueKind.String)
+                result[name] = text.GetValue<string>();
         }
         return result;
     }

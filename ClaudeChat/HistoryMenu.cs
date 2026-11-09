@@ -121,8 +121,8 @@ internal sealed partial class MainWindow
             new(_loc["hmenu.save"], () => SaveAs(e)),
         };
 
-        var code = CodeBlock.Matches(e.Text).Select(m => m.Groups[1].Value).ToList();
-        if (code.Count == 0) code = InlineCode.Matches(e.Text).Select(m => m.Groups[1].Value).Distinct().Take(10).ToList();
+        var code = CodeBlock.Matches(e.Text).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+        if (code.Count == 0) code = InlineCode.Matches(e.Text).Cast<Match>().Select(m => m.Groups[1].Value).Distinct().Take(10).ToList();
         if (code.Count > 0)
         {
             list.Add(null);
@@ -162,7 +162,7 @@ internal sealed partial class MainWindow
             {
                 int cut = Math.Max(candidate.LastIndexOf(' '), candidate.LastIndexOf('\\'));
                 if (cut <= 2) break;
-                candidate = candidate[..cut].TrimEnd('.', ',', ';', ':', ')', ' ', '\\');
+                candidate = candidate.Substring(0, cut).TrimEnd('.', ',', ';', ':', ')', ' ', '\\');
             }
             if ((File.Exists(candidate) || Directory.Exists(candidate)) && candidate.Length > 3
                 && !found.Contains(candidate, StringComparer.OrdinalIgnoreCase))
@@ -183,7 +183,7 @@ internal sealed partial class MainWindow
     private static string MenuLabel(string s)
     {
         s = Regex.Replace(s, @"\s+", " ").Trim();
-        if (s.Length > 50) s = s[..50] + "…";
+        if (s.Length > 50) s = s.Substring(0, 50) + "…";
         return s.Replace("&", "&&");
     }
 

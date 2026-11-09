@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json.Nodes;
 using ClaudeChat.Native;
 
 namespace ClaudeChat;
@@ -362,7 +361,7 @@ internal sealed partial class MainWindow
         if (Win32.SystemParametersInfoForDpi(Win32.SPI_GETNONCLIENTMETRICS, ncm.cbSize, ref ncm, 0, _dpi))
         {
             var lf = ncm.lfMessageFont;
-            lf.lfHeight = (int)Math.Round(lf.lfHeight * Math.Clamp(_settings.FontScale, 0.5, 4.0));
+            lf.lfHeight = (int)Math.Round(lf.lfHeight * Compat.Clamp(_settings.FontScale, 0.5, 4.0));
             font = Win32.CreateFontIndirectW(ref lf);
         }
         else
@@ -398,9 +397,9 @@ internal sealed partial class MainWindow
 
         var ws = _settings.Window;
         RECT work = mi.rcWork;
-        int w = (int)Math.Round(work.Width * Math.Clamp(ws.WidthRatio, 0.1, 1.0));
+        int w = (int)Math.Round(work.Width * Compat.Clamp(ws.WidthRatio, 0.1, 1.0));
         int reserve = (int)Math.Round(Math.Max(0, ws.BottomReserve) * dpi / 96.0);
-        int h = (int)Math.Round(work.Height * Math.Clamp(ws.HeightRatio, 0.1, 1.0)) - reserve;
+        int h = (int)Math.Round(work.Height * Compat.Clamp(ws.HeightRatio, 0.1, 1.0)) - reserve;
         int x = ws.Dock.ToLowerInvariant() switch
         {
             "left" => work.Left,
@@ -1034,7 +1033,7 @@ internal sealed partial class MainWindow
 
         var e = _entries[target];
         string first = e.Text.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.Length > 0) ?? "";
-        if (first.Length > 200) first = first[..200] + "…";
+        if (first.Length > 200) first = first.Substring(0, 200) + "…";
         _speech.Speak(wrapped + Header(e) + ". " + first, true);
     }
 
@@ -1178,7 +1177,7 @@ internal sealed partial class MainWindow
         string s = _liveLine.ToString();
         int cut = all ? s.Length : s.LastIndexOf('\n') + 1;
         if (cut <= 0) return;
-        foreach (var l in s[..cut].Split('\n'))
+        foreach (var l in s.Substring(0, cut).Split('\n'))
             if (l.Trim().Length > 0) AddLive(l.TrimEnd('\r'));
         _liveLine.Remove(0, cut);
     }

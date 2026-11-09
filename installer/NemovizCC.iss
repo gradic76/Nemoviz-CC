@@ -2,7 +2,7 @@
 ;
 ;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\NemovizCC.iss
 ;
-; build-release.cmd runs it after `dotnet publish` (self-contained single file) into
+; build-release.cmd runs it after building the program (.NET Framework 4.8) into
 ; dist\NemovizCC; this script packages that folder and nothing else.
 
 #define AppName      "Nemoviz CC"
@@ -43,10 +43,11 @@ UninstallDisplayIcon={app}\{#AppExe}
 UninstallDisplayName={#AppInstall}
 Compression=lzma2/max
 SolidCompression=yes
-; x64 only: the bundled .NET and nvdaControllerClient.dll are 64-bit.
+; x64 only: the program and nvdaControllerClient.dll are 64-bit.
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-MinVersion=10.0
+; Windows 10 1903 is the first with .NET Framework 4.8 built in.
+MinVersion=10.0.18362
 WizardStyle=modern
 CloseApplications=yes
 RestartApplications=no

@@ -37,7 +37,7 @@ internal sealed partial class MainWindow
         UpdateTypingSound();
     }
 
-    private static float Gain(int percent) => Math.Clamp(percent, 0, 100) / 100f;
+    private static float Gain(int percent) => Compat.Clamp(percent, 0, 100) / 100f;
 
     private void PlaySend() { if (_settings.SoundSend) _audio.Play(_sndSend, gain: Gain(_settings.SoundSendVolume)); }
     private void PlayBell() { if (_settings.SoundBell) _audio.Play(_sndBell, gain: Gain(_settings.SoundBellVolume)); }

@@ -316,10 +316,10 @@ internal sealed partial class MainWindow
         }
 
         using var compressed = new MemoryStream();
-        using (var z = new ZLibStream(compressed, CompressionLevel.Optimal, leaveOpen: true)) z.Write(raw, 0, raw.Length);
+        Compat.WriteZlib(compressed, raw);
 
         using var png = new MemoryStream();
-        png.Write(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 });
+        png.Write(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }, 0, 8);
         var ihdr = new byte[13];
         WriteBigEndian(ihdr, 0, width);
         WriteBigEndian(ihdr, 4, height);
@@ -340,15 +340,15 @@ internal sealed partial class MainWindow
     {
         var len = new byte[4];
         WriteBigEndian(len, 0, data.Length);
-        s.Write(len);
+        s.Write(len, 0, len.Length);
         var typeBytes = Encoding.ASCII.GetBytes(type);
-        s.Write(typeBytes);
-        s.Write(data);
+        s.Write(typeBytes, 0, typeBytes.Length);
+        s.Write(data, 0, data.Length);
         uint crc = Crc32(typeBytes, 0xFFFFFFFF);
         crc = Crc32(data, crc) ^ 0xFFFFFFFF;
         var c = new byte[4];
         WriteBigEndian(c, 0, (int)crc);
-        s.Write(c);
+        s.Write(c, 0, c.Length);
     }
 
     private static uint[]? s_crcTable;
