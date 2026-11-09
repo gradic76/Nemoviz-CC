@@ -113,6 +113,9 @@ internal sealed partial class MainWindow
         _loc = loc;
         _project = project;
         _settings = Settings.Load(userFile, project, cli);
+        // --new is about the conversation this window opens with. Settings are read again on
+        // every switch, and it must not turn each later switch into a new, empty conversation.
+        _cli.Remove("startMode");
         _loc.Load(_settings.Language);
         _theme = Theme.Create(_settings.Theme);
         _speech = SpeechFactory.Create(_settings.Speech);
