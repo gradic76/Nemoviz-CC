@@ -6,6 +6,7 @@ app/
 
 # Private working notes and per-machine files (never published)
 CLAUDE.md
+docs/dnevnik.md
 .claude/
 .claude-chat.json
 prijava.cmd
