@@ -25,12 +25,12 @@ internal sealed partial class MainWindow
     // Combo choices: the value passed to Claude Code (null = its own default) and the text key.
     private static readonly (string? Value, string Key)[] ModelChoices =
     {
-        (null, "choice.default"), ("opus", "model.opus"), ("sonnet", "model.sonnet"),
+        (null, "choice.default"), (AutoChoice, "choice.auto"), ("opus", "model.opus"), ("sonnet", "model.sonnet"),
         ("haiku", "model.haiku"), ("fable", "model.fable"),
     };
     private static readonly (string? Value, string Key)[] EffortChoices =
     {
-        (null, "choice.default"), ("low", "effort.low"), ("medium", "effort.medium"),
+        (null, "choice.default"), (AutoChoice, "choice.auto"), ("low", "effort.low"), ("medium", "effort.medium"),
         ("high", "effort.high"), ("xhigh", "effort.xhigh"), ("max", "effort.max"),
     };
     private static readonly (string? Value, string Key)[] PermissionChoices =
@@ -182,6 +182,7 @@ internal sealed partial class MainWindow
             Win32.TranslateMessage(ref msg);
             Win32.DispatchMessageW(ref msg);
         }
+        KillEstimator();
         _session?.Kill();
         return 0;
     }
@@ -515,6 +516,7 @@ internal sealed partial class MainWindow
 
     private void OnContext(long used, long window)
     {
+        _contextTokens = used;
         _ctxPercent = (int)Math.Round(100.0 * used / window);
         _ctxText = _loc.Format("ind.context", _ctxPercent, used / 1000, window / 1000);
         ShowIndicators();
@@ -1211,7 +1213,15 @@ internal sealed partial class MainWindow
             AddLive(_loc.Format(queueOnly ? "live.queued" : "live.queuedBusy", _queue.Count));
             return;
         }
-        Dispatch(text);
+        DispatchTyped(text);
+    }
+
+    /// <summary>Something the person wrote: with Automatic on, it is rated first. The window's own
+    /// prompts (resume after a limit, hand-over) go straight to Dispatch.</summary>
+    private void DispatchTyped(string text)
+    {
+        if (AutoChoiceOn) EstimateThenSend(text);
+        else Dispatch(text);
     }
 
     private void Dispatch(string text)
@@ -1235,6 +1245,7 @@ internal sealed partial class MainWindow
     /// </summary>
     private void LoadHistory()
     {
+        ResetAutoChoice();
         _entries.Clear();
         _entryStarts.Clear();
         Win32.SetWindowTextW(_history, "");
@@ -1341,9 +1352,11 @@ internal sealed partial class MainWindow
             // settings do not allow is refused, and the refusal is reported in History.
             "--permission-prompts", "none",
         };
-        if (!string.IsNullOrWhiteSpace(_settings.Model)) { args.Add("--model"); args.Add(_settings.Model!); }
+        _sessionModel = EffectiveModel;
+        _sessionEffort = EffectiveEffort;
+        if (!string.IsNullOrWhiteSpace(_sessionModel)) { args.Add("--model"); args.Add(_sessionModel!); }
         if (!string.IsNullOrWhiteSpace(_settings.PermissionMode)) { args.Add("--permission-mode"); args.Add(_settings.PermissionMode!); }
-        if (!string.IsNullOrWhiteSpace(_settings.Effort)) { args.Add("--effort"); args.Add(_settings.Effort!); }
+        if (!string.IsNullOrWhiteSpace(_sessionEffort)) { args.Add("--effort"); args.Add(_sessionEffort!); }
 
         // After the first start (or a restart following a crash or a forced stop) the same
         // conversation always continues; only the very first start honours "startMode".
@@ -1501,7 +1514,7 @@ internal sealed partial class MainWindow
         {
             string next = _queue[0];
             _queue.RemoveAt(0);
-            Dispatch(next);
+            DispatchTyped(next);
             return;
         }
         CheckRestartRequest();
@@ -1532,6 +1545,7 @@ internal sealed partial class MainWindow
             else Win32.MessageBeep(0);
             return;
         }
+        if (_estimateText != null) { CancelEstimate(); return; }
         if (_stopping) return;
         _stopping = true;
         SetLive(_loc["live.stopping"]);

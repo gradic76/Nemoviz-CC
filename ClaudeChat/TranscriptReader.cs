@@ -48,6 +48,22 @@ public static class TranscriptReader
 
     public static List<Message> Load(string file, string imageNote, int maxMessages)
     {
+        var result = Read(file, imageNote, maxMessages, skipByText: true);
+        // Nothing found: perhaps the file's format changed and the shortcut no longer fits.
+        return result.Count > 0 ? result : Read(file, imageNote, maxMessages, skipByText: false);
+    }
+
+    /// <summary>Most of a long transcript is tool results and tool calls, which never become
+    /// messages. They are recognised in the raw text, which costs far less than parsing them.
+    /// In text inside JSON strings the quotes are escaped, so these patterns only match real fields.</summary>
+    private static bool MayHoldMessage(string line)
+    {
+        if (line.Contains("\"type\":\"user\"") && !line.Contains("\"type\":\"tool_result\"")) return true;
+        return line.Contains("\"type\":\"assistant\"") && line.Contains("\"type\":\"text\"");
+    }
+
+    private static List<Message> Read(string file, string imageNote, int maxMessages, bool skipByText)
+    {
         var result = new List<Message>();
         var answer = new StringBuilder();
         DateTime answerTime = DateTime.MinValue;
@@ -65,6 +81,7 @@ public static class TranscriptReader
         while ((line = reader.ReadLine()) != null)
         {
             if (line.Length == 0 || line[0] != '{') continue;
+            if (skipByText && !MayHoldMessage(line)) continue;
             JsonNode? root;
             try { root = JsonNode.Parse(line); }
             catch (JsonException) { continue; }
