@@ -6,8 +6,8 @@
 ; dist\NemovizCC; this script packages that folder and nothing else.
 
 #define AppName      "Nemoviz CC"
-#define AppVersion   "0.1.2"
-#define AppVersionNo "0.1.2.0"
+#define AppVersion   "0.1.3"
+#define AppVersionNo "0.1.3.0"
 ; The channel: empty gives "Nemoviz CC" everywhere; " Beta" would give the beta channel
 ; (no build numbers in installed names — they would become folder names).
 #define AppChannel   ""
