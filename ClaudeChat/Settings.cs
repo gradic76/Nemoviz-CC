@@ -56,6 +56,9 @@ public sealed class Settings
     /// </summary>
     public string? RestartCommand { get; set; }
 
+    /// <summary>The open conversation can also be typed into from the Claude mobile app.</summary>
+    public bool MobileAccess { get; set; }
+
     // --- Usage limit ---
     public bool ResumeAfterLimit { get; set; }
     /// <summary>Look for a newer release at start (at most once a day).</summary>
@@ -259,6 +262,8 @@ public sealed class AppState
     public Dictionary<string, string> ProjectTitles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>Project folders outside the projects folder, opened by hand (Code list).</summary>
     public List<string> ExtraProjects { get; set; } = new();
+    /// <summary>Per conversation: the phone's session, to return to after a restart.</summary>
+    public Dictionary<string, string> MobileBridges { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     private static string FilePath => Path.Combine(Settings.AppDataFolder, "state.json");
 

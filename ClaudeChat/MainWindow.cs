@@ -170,6 +170,7 @@ internal sealed partial class MainWindow
         RestoreDraft();
         InitSounds();
         RemoveOldFiles();
+        ApplyKeepAwake();
         AutoCheckForUpdates();
         try { File.Delete(RestartFlag); } catch { } // a request older than this window is stale
         Win32.SetTimer(_hwnd, (IntPtr)TimerRestart, 2000, IntPtr.Zero);
@@ -308,6 +309,7 @@ internal sealed partial class MainWindow
         Win32.AppendMenuW(session, Win32.MF_SEPARATOR, IntPtr.Zero, null);
         Win32.AppendMenuW(session, Win32.MF_STRING | (_settings.ResumeAfterLimit ? Win32.MF_CHECKED : 0), IdmResume, _loc["menu.session.resume"]);
         Win32.AppendMenuW(session, Win32.MF_STRING, IdmHandoff, _loc["menu.session.handoff"]);
+        Win32.AppendMenuW(session, Win32.MF_STRING | (_settings.MobileAccess ? Win32.MF_CHECKED : 0), IdmMobile, _loc["menu.session.mobile"]);
         Win32.AppendMenuW(session, Win32.MF_SEPARATOR, IntPtr.Zero, null);
         Win32.AppendMenuW(session, Win32.MF_STRING, IdmRunProgram, _loc["menu.session.run"]);
         Win32.AppendMenuW(session, Win32.MF_STRING, IdmChangeProgram, _loc["menu.session.changeProgram"]);
@@ -823,6 +825,7 @@ internal sealed partial class MainWindow
             }
             case IdStop when code == Win32.BN_CLICKED: Stop(); break;
             case IdmResume: OnResumeToggled(); break;
+            case IdmMobile: OnMobileToggled(); break;
             case IdmHandoff: RequestHandoff(); break;
             case IdModel or IdEffort or IdPerm when code == Win32.CBN_SELCHANGE: OnComboChanged(id); break;
             case IdmExit: Win32.PostMessageW(_hwnd, Win32.WM_CLOSE, IntPtr.Zero, IntPtr.Zero); break;
@@ -1245,6 +1248,7 @@ internal sealed partial class MainWindow
     private void LoadHistory()
     {
         ResetAutoChoice();
+        ForgetMobileSession();
         _entries.Clear();
         _entryStarts.Clear();
         Win32.SetWindowTextW(_history, "");
@@ -1351,6 +1355,8 @@ internal sealed partial class MainWindow
             // The first release has no permission dialog: whatever the user's Claude Code
             // settings do not allow is refused, and the refusal is reported in History.
             "--permission-prompts", "none",
+            // Without this, a message typed on the phone never shows up here.
+            "--replay-user-messages",
         };
         _sessionModel = EffectiveModel;
         _sessionEffort = EffectiveEffort;
@@ -1400,6 +1406,10 @@ internal sealed partial class MainWindow
         session.Exited += OnExited;
         session.Limits += OnLimits;
         session.Context += OnContext;
+        session.RemoteEnabled += OnRemoteEnabled;
+        session.RemoteFailed += OnRemoteFailed;
+        session.BridgeState += OnBridgeState;
+        session.RemoteMessage += OnRemoteMessage;
         try
         {
             SetLive(_loc["live.starting"]);
@@ -1416,6 +1426,7 @@ internal sealed partial class MainWindow
         _forceNew = false;
         if (!_startedOnce) AddEntry(_loc["role.system"], _loc.Format("history.started", _project, startNote));
         _startedOnce = true;
+        if (_settings.MobileAccess) EnableMobile();
         return true;
     }
 
@@ -1425,6 +1436,7 @@ internal sealed partial class MainWindow
         {
             _lastSessionId = sessionId;
             _state.Sessions[StateKey] = sessionId;
+            RememberMobileBridge();
             if (_pendingMeta != null) { _state.Conversations[sessionId] = _pendingMeta; _pendingMeta = null; }
             _state.Save();
         }
@@ -1632,7 +1644,7 @@ internal sealed partial class MainWindow
     {
         if (id == TimerStop) { ForceStop(); return; }
         if (id == TimerRestart) { CheckRestartRequest(); return; }
-        if (id == TimerSound) { UpdateTypingSound(); UpdateStopButton(); StopFlashWhenActive(); InstallWhenIdle(); return; }
+        if (id == TimerSound) { UpdateTypingSound(); UpdateStopButton(); StopFlashWhenActive(); InstallWhenIdle(); KeepMobileAlive(); return; }
         if (id != TimerLimit) return;
         if (!ResumeChecked || _resumeAt == null) { CancelResumeTimer(); return; }
         if (DateTimeOffset.Now < _resumeAt.Value || _busy) return;

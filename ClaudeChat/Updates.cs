@@ -12,8 +12,8 @@ using ClaudeChat.Native;
 namespace ClaudeChat;
 
 /// <summary>
-/// Updates and help (author, 2026-11-07/08). Help → Check for updates, and on its own at start at
-/// most once a day (Settings → General): GitHub's latest release is compared with this build. A
+/// Updates and help (author, 2026-11-07/08). Help → Check for updates, and on its own at every
+/// start (Settings → General): GitHub's latest release is compared with this build. A
 /// newer one is offered in a box with its What's new (the release text; "## Hrvatski" and
 /// "## English" sections pick the language). Update downloads it, checks size and SHA-256, waits
 /// for the current answer to finish, and installs without further questions:
@@ -54,11 +54,10 @@ internal sealed partial class MainWindow
         return http;
     }
 
-    /// <summary>Once a day at start, if allowed; silent unless there is something new.</summary>
+    /// <summary>At every start, if allowed; silent unless there is something new.</summary>
     private void AutoCheckForUpdates()
     {
         if (!_settings.CheckUpdates || IsDevelopmentCopy) return;
-        if (_state.LastUpdateCheck is { } last && DateTime.UtcNow - last < TimeSpan.FromHours(20)) return;
         CheckForUpdates(manual: false);
     }
 

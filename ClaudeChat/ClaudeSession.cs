@@ -48,6 +48,10 @@ public sealed class ClaudeSession : IDisposable
     public event Action<double?, DateTimeOffset?, double?, DateTimeOffset?>? Limits;
     /// <summary>Tokens in the context after the last request, and the model's context window.</summary>
     public event Action<long, long>? Context;
+    public event Action<string, string>? RemoteEnabled;         // phone session url, its id
+    public event Action<string>? RemoteFailed;                  // why
+    public event Action<string>? BridgeState;                   // ready, connected, failed…
+    public event Action<string, int>? RemoteMessage;            // text typed on the phone, images
 
     public ClaudeSession(Action<Action> post) { _post = post; }
 
@@ -95,6 +99,28 @@ public sealed class ClaudeSession : IDisposable
             ["type"] = "control_request",
             ["request_id"] = $"cc-{Interlocked.Increment(ref _requestCounter)}",
             ["request"] = new JsonObject { ["subtype"] = "interrupt" },
+        };
+        WriteLine(msg.ToJsonString());
+    }
+
+    /// <summary>Makes this process reachable from the Claude mobile app. With reattachId it returns
+    /// to the phone session of an earlier process, which stays open after this one ends.</summary>
+    public void EnableRemoteControl(string name, string? reattachId)
+    {
+        var request = new JsonObject { ["subtype"] = "remote_control", ["enabled"] = true, ["name"] = name, ["keep_session_on_exit"] = true };
+        if (reattachId != null) request["reattach_session_id"] = reattachId;
+        SendControl("rc", request);
+    }
+
+    public void DisableRemoteControl() => SendControl("rc", new JsonObject { ["subtype"] = "remote_control", ["enabled"] = false });
+
+    private void SendControl(string prefix, JsonObject request)
+    {
+        var msg = new JsonObject
+        {
+            ["type"] = "control_request",
+            ["request_id"] = $"{prefix}-{Interlocked.Increment(ref _requestCounter)}",
+            ["request"] = request,
         };
         WriteLine(msg.ToJsonString());
     }
@@ -176,6 +202,29 @@ public sealed class ClaudeSession : IDisposable
                 break;
             }
 
+            case "system" when Str(obj, "subtype") == "bridge_state":
+            {
+                string state = Str(obj, "state");
+                _post(() => BridgeState?.Invoke(state));
+                break;
+            }
+
+            case "control_response":
+            {
+                if (obj["response"] is not JsonObject response || !Str(response, "request_id").StartsWith("rc-", StringComparison.Ordinal)) break;
+                if (Str(response, "subtype") != "success")
+                {
+                    string why = Str(response, "error");
+                    _post(() => RemoteFailed?.Invoke(why));
+                }
+                else if (response["response"] is JsonObject on && Str(on, "session_url").Length > 0)
+                {
+                    string url = Str(on, "session_url"), bridge = Str(on, "bridge_session_id");
+                    _post(() => RemoteEnabled?.Invoke(url, bridge));
+                }
+                break;
+            }
+
             case "stream_event":
             {
                 var ev = obj["event"] as JsonObject;
@@ -213,6 +262,16 @@ public sealed class ClaudeSession : IDisposable
 
             case "user":
             {
+                // Replayed: a message typed here (nothing to do) or on the phone (it carries "origin").
+                if (obj["isReplay"]?.GetValueKind() == JsonValueKind.True)
+                {
+                    if (obj["origin"] is JsonObject)
+                    {
+                        var (typed, images) = Typed(obj["message"]?["content"]);
+                        _post(() => RemoteMessage?.Invoke(typed, images));
+                    }
+                    break;
+                }
                 if (obj["message"]?["content"] is JsonArray content)
                     foreach (var item in content)
                         if (item is JsonObject block && Str(block, "type") == "tool_result")
@@ -282,6 +341,21 @@ public sealed class ClaudeSession : IDisposable
                 break;
             }
         }
+    }
+
+    private static (string Text, int Images) Typed(JsonNode? content)
+    {
+        if (content is JsonValue v && v.GetValueKind() == JsonValueKind.String) return (v.GetValue<string>(), 0);
+        var text = new StringBuilder();
+        int images = 0;
+        if (content is JsonArray blocks)
+            foreach (var item in blocks)
+            {
+                if (item is not JsonObject block) continue;
+                if (Str(block, "type") == "text") text.Append(Str(block, "text"));
+                else if (Str(block, "type") == "image") images++;
+            }
+        return (text.ToString(), images);
     }
 
     private static string Str(JsonObject obj, string key) =>
