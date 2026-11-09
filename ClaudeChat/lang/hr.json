@@ -298,6 +298,9 @@
   "history.stopped": "Zaustavljeno na tvoj zahtjev.",
   "history.limit": "Dosegnut limit. {0}",
   "history.resumed": "Limit je prošao; nastavljam.",
+  "history.chromeOn": "Claude in Chrome je uključen.",
+  "history.chromeOff": "Claude in Chrome je isključen.",
+  "chrome.continue": "Claude in Chrome je uključen. Nastavi gdje si stao.",
   "history.exited": "Claude Code se neočekivano zatvorio (kod {0}). Ponovno će se pokrenuti sa sljedećom porukom. {1}",
   "history.image": "(slika)",
 

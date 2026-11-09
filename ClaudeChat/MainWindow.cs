@@ -1390,7 +1390,7 @@ internal sealed partial class MainWindow
         }
         else startNote = _loc["history.new"];
         // The window's own note, then the chat's instructions (New chat), on every start.
-        string prompt = SystemPromptForWindow;
+        string prompt = (SystemPromptForWindow + "\n\n" + ChromeNote).Trim();
         var meta = wantNew ? _pendingMeta : resumeId != null && _state.Conversations.TryGetValue(resumeId, out var m) ? m : null;
         if (!string.IsNullOrWhiteSpace(meta?.Instructions)) prompt = (prompt + "\n\n" + meta!.Instructions).Trim();
         if (prompt.Length > 0) { args.Add("--append-system-prompt"); args.Add(prompt); }
@@ -1522,6 +1522,8 @@ internal sealed partial class MainWindow
         if (_handoff == Handoff.Writing && r.IsError) _handoff = Handoff.None; // the error is in History
         if (_handoff == Handoff.Writing) { StartAfterHandoff(); return; }
         if (_handoff == Handoff.Due) { StartHandoffWriting(); return; }
+
+        if (HandleChromeRequest()) return;
 
         if (_queue.Count > 0)
         {

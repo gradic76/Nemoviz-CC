@@ -298,6 +298,9 @@
   "history.stopped": "Stopped at your request.",
   "history.limit": "Usage limit reached. {0}",
   "history.resumed": "The usage limit has passed; continuing.",
+  "history.chromeOn": "Claude in Chrome is on.",
+  "history.chromeOff": "Claude in Chrome is off.",
+  "chrome.continue": "Claude in Chrome is on. Continue where you left off.",
   "history.exited": "Claude Code exited unexpectedly (code {0}). It will be restarted with your next message. {1}",
   "history.image": "(image)",
 
