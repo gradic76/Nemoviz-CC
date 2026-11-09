@@ -59,6 +59,10 @@ public sealed class Settings
     /// <summary>The open conversation can also be typed into from the Claude mobile app.</summary>
     public bool MobileAccess { get; set; }
 
+    /// <summary>Passes --chrome, so Claude can work in the user's Chrome. Off by default: the
+    /// tools add about 4,000 tokens of context to every conversation (measured).</summary>
+    public bool UseChrome { get; set; }
+
     // --- Usage limit ---
     public bool ResumeAfterLimit { get; set; }
     /// <summary>Look for a newer release at start (at most once a day).</summary>

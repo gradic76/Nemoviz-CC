@@ -1394,6 +1394,7 @@ internal sealed partial class MainWindow
         var meta = wantNew ? _pendingMeta : resumeId != null && _state.Conversations.TryGetValue(resumeId, out var m) ? m : null;
         if (!string.IsNullOrWhiteSpace(meta?.Instructions)) prompt = (prompt + "\n\n" + meta!.Instructions).Trim();
         if (prompt.Length > 0) { args.Add("--append-system-prompt"); args.Add(prompt); }
+        if (_settings.UseChrome && !_settings.ClaudeArgs.Contains("--chrome")) args.Add("--chrome");
         args.AddRange(_settings.ClaudeArgs);
 
         var session = new ClaudeSession(Post);

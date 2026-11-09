@@ -203,6 +203,7 @@
   "set.instrChat": "Upute za chatove (samo mapa Chat)",
   "set.editProject": "Uredi upute projekta {0}…",
   "set.instrError": "Nisam mogao spremiti {0}: {1}",
+  "set.chrome": "Koristi Claude in Chrome",
   "tpl.personal": "# Osobne upute\n\nOvo Claude čita na početku svakog razgovora, u svim projektima i chatovima (i u desktop aplikaciji). Slobodno mijenjaj, dodaj ili briši.\n\n## O meni\n\n- Ime:\n- Čime se bavim:\n- Čitač ekrana (npr. JAWS, NVDA ili nikakav):\n\n## Ophođenje\n\n- Piši mi na hrvatskom i obraćaj mi se na ti.\n- Budi izravan i sažet: bez uvoda, bez ponavljanja pitanja i bez pretjerane ljubaznosti.\n- Kad ima više mogućnosti, preporuči jednu i reci zašto.\n- Ako nešto ne znaš ili nisi provjerio, reci to; ne iznosi nagađanje kao činjenicu.\n- Ako se ne slažeš sa mnom ili vidiš problem, reci odmah.\n- Prije nepovratnih radnji (brisanje, slanje, objavljivanje) pitaj.\n\n## Odgovori\n\n- Duljinu prilagodi pitanju: kratko pitanje, kratak odgovor.\n- Kad nešto napraviš, reci što je gotovo i provjereno, a što nije.\n",
   "tpl.chat": "# Upute za chatove\n\nOvo vrijedi samo za obične razgovore (mapa Chat), ne za projekte. Slobodno mijenjaj.\n\n- Ovo je razgovor, a ne rad na projektu: ne stvaraj i ne mijenjaj datoteke osim ako to izričito tražim.\n- Odgovaraj kao sugovornik, prirodno i jasno.\n- Za stvari koje se mijenjaju (vijesti, cijene, verzije programa) pretraži web i reci odakle je podatak.\n- Ako pitanje nije jasno, prvo postavi jedno kratko pitanje.\n",
   "set.ok": "U redu",

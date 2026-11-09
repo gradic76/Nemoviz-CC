@@ -26,7 +26,7 @@ internal sealed partial class MainWindow
 
     private IntPtr _dlg, _tab;
     private readonly List<IntPtr> _pageGeneral = new(), _pageSounds = new(), _pageClaude = new();
-    private IntPtr _edPersonal, _edChat, _btnEditProject;
+    private IntPtr _edPersonal, _edChat, _btnEditProject, _chkChrome;
     private string? _diskPersonal, _diskChat; // the files as they were when the dialog opened; null = missing
     private IntPtr _cbLang, _cbTheme, _cbFont, _chkSpeakSent, _chkSpeakReplies, _chkResume, _chkUpdates, _cbHandoff, _edRoot;
     private IntPtr _chkSend, _chkBell, _chkTyping, _cbDevice, _chkKeepAwake, _cbVolSend, _cbVolBell, _cbVolTyping;
@@ -170,6 +170,7 @@ internal sealed partial class MainWindow
         DlgChild("STATIC", _loc["set.instrChat"], label, 0, 0, c);
         _edChat = DlgChild("EDIT", "", multi, Win32.WS_EX_CLIENTEDGE, 0, c);
         _btnEditProject = DlgChild("BUTTON", _loc.Format("set.editProject", Path.GetFileName(_project.TrimEnd('\\', '/'))), button, 0, IdEditProject, c);
+        _chkChrome = DlgChild("BUTTON", _loc["set.chrome"], check, 0, 0, c);
         foreach (var e in new[] { _edPersonal, _edChat }) Win32.SendMessageW(e, Win32.EM_SETLIMITTEXT, IntPtr.Zero, IntPtr.Zero);
         // In the Chat folder the project's CLAUDE.md is the chat instructions above.
         if (SameFolder(_project, ChatFolderPath)) Win32.EnableWindow(_btnEditProject, false);
@@ -321,6 +322,7 @@ internal sealed partial class MainWindow
         _diskChat = ReadInstructions(ChatInstructionsPath);
         Win32.SetWindowTextW(_edPersonal, _diskPersonal ?? ToEdit(_loc["tpl.personal"]));
         Win32.SetWindowTextW(_edChat, _diskChat ?? ToEdit(_loc["tpl.chat"]));
+        Check(_chkChrome, _settings.UseChrome);
     }
 
     /// <summary>Writes every value from the dialog into the settings and applies it at once.</summary>
@@ -367,6 +369,14 @@ internal sealed partial class MainWindow
             if (WriteInstructions(path, text, disk) is { } err) AddEntry(_loc["role.system"], _loc.Format("set.instrError", path, err));
         _diskPersonal = ReadInstructions(PersonalInstructionsPath);
         _diskChat = ReadInstructions(ChatInstructionsPath);
+
+        // --chrome is a start argument, so a change takes effect with a fresh process.
+        bool chrome = Checked(_chkChrome);
+        if (chrome != _settings.UseChrome)
+        {
+            _settings.UseChrome = chrome; Save("useChrome", chrome);
+            RestartClaudeWhenIdle();
+        }
 
         if (langChanged) _loc.Load(lang);
         if (themeChanged) ApplyTheme();
